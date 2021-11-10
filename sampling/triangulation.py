@@ -57,6 +57,60 @@ def draw_voronoi(img, subdiv) :
 
         cv2.circle(img, (int(centers[i][0]), int(centers[i][1])), 3, (0, 0, 0), cv2.FILLED, cv2.LINE_AA, 0)
 
+def DelaunayTriangulation(img, point_num=1000):
+    if img is None:
+        raise Exception('Img can not be None.')
+    if not isinstance(img, np.ndarray):
+        raise Exception('Input should be img/array.')
+    # Turn on animation while drawing triangles
+    animate = False
+
+    # Define colors for drawing.
+    delaunay_color = (255,255,255)
+    points_color = (0, 0, 255)
+
+    # Keep a copy around
+    img_orig = img.copy() 
+
+    # Rectangle to be used with Subdiv2D
+    size = img.shape
+    rect = (0, 0, size[1], size[0])
+
+    # Create an instance of Subdiv2D
+    subdiv = cv2.Subdiv2D(rect) 
+    
+    # Create an array of points.
+    points = set()
+    
+    # generate points randomly
+    width = img.shape[0]
+    height = img.shape[1]
+    for i in range(point_num):
+        x = np.random.randint(0, width)
+        y = np.random.randint(0, height)
+        points.add((y,x))
+
+    # Insert points into subdiv
+    for p in points :
+        # import pdb; pdb.set_trace()
+        subdiv.insert(p)
+
+    # Draw delaunay triangles
+    draw_delaunay( img, subdiv, (255, 255, 255) ) 
+
+    # Draw points
+    for p in points :
+        draw_point(img, p, (0,0,255))
+
+    # Allocate space for Voronoi Diagram
+    img_voronoi = np.zeros(img.shape, dtype = img.dtype)
+
+    # Draw Voronoi diagram
+    draw_voronoi(img_voronoi,subdiv)
+
+    return img, img_voronoi
+
+
 if __name__ == '__main__':
 
     # Define window names
