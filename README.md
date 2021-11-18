@@ -14,8 +14,8 @@
   - [x] Vertex
   - [ ] linear interpolation
 - [ ] 模型方法
-  - [x] SRCNN, single img(ECCV 2014)
-  - [x] CNF, SISR
+  - [x] Super Resoultion CNN (SRCNN), for single img (ECCV 2014)
+  - [x] Conditional Normalizing Flows (CNF), for single img (ICLR 2020)
   - [ ] 其他更fancy/SOTA的算法
 - [ ] 提高框架的使用性
   - [ ] 更好的log方式
