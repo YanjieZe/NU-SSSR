@@ -46,7 +46,7 @@ def train(args):
     for e in range(args.epoch):
         model.train()
         for idx, img_pair in enumerate(train_loader):
-            break
+    
             img_hr = img_pair['hr'].to(device)
             img_lr = img_pair['lr'].to(device)
             
@@ -63,7 +63,6 @@ def train(args):
                 print('epoch: %u | idx: %u | loss:%f |'%(e, idx, loss.item()) )
 
         utils.save_model(model, e, args)
-        break
 
 if __name__=='__main__':
     args = parse_args()
