@@ -2,10 +2,13 @@
 
 这是我们的demo.
 
-![](./imgs/delaunay.jpg)
+
+采样后结果，分别是采样1000个点和10000个点。
+![](imgs/blur_point1000.jpg)
+
+![](imgs/blur_point10000.png)
 
 
-![](./imgs/voronoi.jpg)
 
 # To Do List
 - [ ] 采样

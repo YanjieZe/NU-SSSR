@@ -13,7 +13,7 @@ except:
 	print('Wandb is not installed in your env. Skip `import wandb`.')
 	pass
 
-def train(args):
+def predict(args):
     utils.set_seed_everywhere(args.seed)
 
     if args.wandb:
@@ -23,8 +23,8 @@ def train(args):
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    train_dataset = utils.TrainDataset(args)
-    train_loader = data.DataLoader(dataset=train_dataset,
+    test_dataset = utils.TestDataset(args)
+    test_loader = data.DataLoader(dataset=test_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
                                   num_workers=args.num_workers,
@@ -37,34 +37,31 @@ def train(args):
     model = utils.make_model(args).to(device)
     model = model.float()
 
-    optimizer = optim.Adam([
-        {'params': model.conv1.parameters()},
-        {'params': model.conv2.parameters()},
-        {'params': model.conv3.parameters(), 'lr': args.lr * 0.1}
-    ], lr=args.lr)
+    # load weight
+    epoch = args.predict_epoch
+    utils.load_model(model, epoch, args)
 
-    for e in range(args.epoch):
-        model.train()
-        for idx, img_pair in enumerate(train_loader):
-    
+
+    model.eval()
+    for idx, img_pair in enumerate(test_loader):
+        with torch.no_grad():
             img_hr = img_pair['hr'].to(device)
             img_lr = img_pair['lr'].to(device)
             
             img_predict = model(img_lr)
 
-            loss = loss_function(img_hr, img_predict)
+            for i in range(args.batch_size):
+                hr = img_hr[i].permute(1,2,0)
+                lr = img_lr[i].permute(1,2,0)
+                pred_hr = img_predict[i].permute(1,2,0)
+                utils.show_gt_and_pred(img_hr=hr, img_lr=lr, pred_hr=pred_hr )
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            if args.wandb:
-                wandb.log({'loss':loss.item()})
-            else:
-                print('epoch: %u | idx: %u | loss:%f |'%(e, idx, loss.item()) )
+            loss = loss_function(img_hr, img_predict)
         
-        utils.save_model(model, e, args)
+            print('idx: %u | loss:%f |'%(idx, loss.item()) )
+        break
 
 if __name__=='__main__':
     args = parse_args()
     print(args)
-    train(args)
+    predict(args)

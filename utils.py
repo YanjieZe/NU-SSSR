@@ -40,6 +40,10 @@ def save_model(model, epoch, args):
     save_path = os.path.join(args.log_dir, args.alg+'_'+str(epoch)+'.pth')
     torch.save(model.state_dict(), save_path)
 
+def load_model(model, epoch, args):
+    save_path = os.path.join(args.log_dir, args.alg+'_'+str(epoch)+'.pth')
+    model.load_state_dict(torch.load(save_path))
+    
 def collect_function(batch):
     img_pair = dict()
     for idx, pair in enumerate(batch):
@@ -55,6 +59,26 @@ def collect_function(batch):
     img_pair['lr'] = img_pair['lr'].permute(0, 3,1,2)
 
     return img_pair
+
+def show_gt_and_pred(img_hr, img_lr, pred_hr):
+    plt.figure(1)
+    plt.subplot(1, 3, 1) #图一包含1行2列子图，当前画在第一行第一列图上
+    plt.imshow(img_hr)
+    plt.title('ground truth hr')
+
+    plt.figure(1)
+    plt.subplot(1, 3, 2) #图一包含1行2列子图，当前画在第一行第一列图上
+    plt.imshow(img_lr)
+    plt.title('ground truth lr')
+
+    plt.figure(1)
+    plt.subplot(1, 3, 3)#当前画在第一行第2列图上
+    plt.imshow(pred_hr)
+    plt.title('predict hr')
+
+    plt.show()
+
+
 
 class TrainDataset(Dataset):
     def __init__(self, args):
@@ -108,29 +132,48 @@ class TestDataset(Dataset):
     def __init__(self, args):
         self.args = args
         self.root_path = os.path.join(args.data_root, 'test')
-        self.img_list = os.listdir(os.path.join(args.data_root, 'test'))
+        self.img_list = os.listdir(self.root_path)
         try:
             self.img_list.remove('.DS_Store')
         except:
             pass
-        
         self.method = args.method
+        self.transform_on_hr = self.get_transform('hr')
+        self.transform_on_lr = self.get_transform('lr')
+
     
+    def get_transform(self, target):
+        if target=='lr':
+            trans = transforms.Compose( 
+                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                )
+        elif target=='hr':
+            trans = transforms.Compose( 
+                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                )
+        else:
+            raise Exception('Transform not supported.')
+        return trans
+
     def __getitem__(self, idx):
         img_path = os.path.join(self.root_path, self.img_list[idx])
         img_pair = dict()
 
-        img_hr = np.array(Image.open(img_path))
+        img_hr = Image.open(img_path)
+        img_hr= np.array(self.transform_on_hr(img_hr))
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
-        img_pair['lr'] = DelaunayTriangulationBlur(img_hr, \
+        img_lr = DelaunayTriangulationBlur(img_hr, \
             self.args.point_num, self.args.method)
-        img_pair['lr'] = torch.tensor(img_pair['lr'], dtype=torch.float32)
-
+        img_lr = self.transform_on_lr(Image.fromarray(img_lr))
+        img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
+        
         img_pair['hr'] /= 255
         img_pair['lr'] /= 255
+
         return img_pair
     
     def __len__(self):
         return len(self.img_list)
-    
+
+  
 
