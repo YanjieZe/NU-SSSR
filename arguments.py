@@ -39,7 +39,6 @@ def parse_args():
     parser.add_argument("--cnf_L", type=int, default=2, help="# of levels")
     parser.add_argument("--cnf_K", type=int, default=8,
                         help="# of flow steps, i.e. model depth")
-    parser.add_argument("--cnf_bsz", type=int, default=128, help="batch size")
     parser.add_argument("--cnf_nb", type=int, default=16,
                         help="# of residual-in-residual blocks LR network.")
     parser.add_argument("--cnf_condch", type=int, default=128,

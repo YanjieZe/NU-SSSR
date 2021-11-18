@@ -44,7 +44,7 @@ def make_model(args):
             args.cnf_filter_size,
             args.cnf_L,
             args.cnf_K,
-            args.cnf_bsz,
+            args.batch_size,
             1,
             args.cnf_nb,
             args.cnf_condch,
