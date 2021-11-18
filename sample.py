@@ -1,10 +1,13 @@
 import cv2
-from sampling import DelaunayTriangulation
+import utils
+from sampling import DelaunayTriangulation, DelaunayTriangulationBlur
 
 if __name__=='__main__':
-    img_path = 'imgs/img_test.jpeg'
+    img_path = 'imgs/img_origin.jpeg'
     img = cv2.imread(img_path)
-    img_delaunay, img_voronoi = DelaunayTriangulation(img)
+    img_delaunay = DelaunayTriangulation(img, 2000)
     
-    cv2.imwrite('imgs/delaunay.jpg', img_delaunay)
-    cv2.imwrite('imgs/voronoi.jpg', img_voronoi)
+    utils.show_img(img_delaunay)
+
+    img_delaunay = DelaunayTriangulationBlur(img,10000, method="center")
+    utils.show_img(img_delaunay)
