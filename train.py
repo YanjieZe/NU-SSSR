@@ -37,11 +37,7 @@ def train(args):
     model = utils.make_model(args).to(device)
     model = model.float()
 
-    optimizer = optim.Adam([
-        {'params': model.conv1.parameters()},
-        {'params': model.conv2.parameters()},
-        {'params': model.conv3.parameters(), 'lr': args.lr * 0.1}
-    ], lr=args.lr)
+    optimizer = optim.Adam(params=model.parameters(),lr=args.lr)
 
     for e in range(args.epoch):
         model.train()
@@ -61,7 +57,7 @@ def train(args):
                 wandb.log({'loss':loss.item()})
             else:
                 print('epoch: %u | idx: %u | loss:%f |'%(e, idx, loss.item()) )
-        
+
         utils.save_model(model, e, args)
 
 if __name__=='__main__':

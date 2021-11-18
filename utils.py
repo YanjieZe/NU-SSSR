@@ -30,9 +30,13 @@ def save_img(name, img):
 
 def make_model(args):
     model_name = args.alg
-    from models import SRCNN
+    
     if model_name=='SRCNN':
+        from models import SRCNN
         return SRCNN(args)
+    elif model_name=='SRCNN2':
+        from models import SRCNN2
+        return SRCNN2(args)
     else:
         raise NotImplemented('Model %s is not implemented.'%model_name)
 

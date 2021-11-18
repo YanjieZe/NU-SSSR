@@ -14,7 +14,7 @@ except:
 	pass
 
 def predict(args):
-    utils.set_seed_everywhere(args.seed)
+    # utils.set_seed_everywhere(args.seed)
 
     if args.wandb:
         wandb.login(key=args.wandb_key)

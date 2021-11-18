@@ -4,7 +4,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # basic
-    parser.add_argument('--alg', default='SRCNN', choices=['SRCNN'])
+    parser.add_argument('--alg', default='SRCNN2', choices=['SRCNN', 'SRCNN2'])
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
 
