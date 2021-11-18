@@ -8,8 +8,6 @@
 
 ![](imgs/blur_point10000.png)
 
-
-
 # To Do List
 - [ ] 采样
   - [x] Center
@@ -70,8 +68,13 @@ Set14, [link](https://deepai.org/dataset/set14-super-resolution)
 ![](imgs/delaunay.jpg)
 
 ## Backbone/Baseline
-1. SRCNN, ECCV 2014, [link](https://github.com/yjn870/SRCNN-pytorch)
-2. 
+1.SRCNN, ECCV 2014, [link](https://github.com/yjn870/SRCNN-pytorch)
+下面两幅图分别是SRCNN和SRCNN2在一个epoch后进行预测的结果。说明了只增加网络宽度和深度后，模型拟合会更慢，会导致算法效果变差。但是在很多个epoch后是否还会这样不清楚。
+
+![](imgs/pred_SRCNN1_epoch0.png)
+
+![](imgs/predict_SRCNN2_epoch0.png)
+
 
 # 参考
 1. Neural supersampling for real-time rendering, 2020, [link](https://research.fb.com/wp-content/uploads/2020/06/Neural-Supersampling-for-Real-time-Rendering.pdf)
