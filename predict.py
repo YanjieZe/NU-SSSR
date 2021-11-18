@@ -54,7 +54,7 @@ def predict(args):
                 hr = img_hr[i].permute(1,2,0)
                 lr = img_lr[i].permute(1,2,0)
                 pred_hr = img_predict[i].permute(1,2,0)
-                utils.show_gt_and_pred(img_hr=hr, img_lr=lr, pred_hr=pred_hr )
+                utils.show_gt_and_pred(img_hr=hr, img_lr=lr, pred_hr=pred_hr)
 
             loss = loss_function(img_hr, img_predict)
         

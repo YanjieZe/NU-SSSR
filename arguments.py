@@ -1,10 +1,10 @@
 import argparse
 
-def parse_args():
+def parse_args(args=None):
     parser = argparse.ArgumentParser()
 
     # basic
-    parser.add_argument('--alg', default='SRCNN2', choices=['SRCNN', 'SRCNN2', "CNF"])
+    parser.add_argument('--alg', default='SRCNN2', choices=['SRCNN', 'SRCNN2', "CNF", "VDSR"])
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--device', default="gpu", type=str)
@@ -21,6 +21,7 @@ def parse_args():
     parser.add_argument('--img_width',default=256, type=int)
     parser.add_argument('--img_height',default=256, type=int)
     parser.add_argument('--log_dir', default='logs', type=str)
+    parser.add_argument('--description', default='', type=str)
     
     # predict
     parser.add_argument('--predict_epoch', default=0, type=int, help="which epoch of weight you may use")
@@ -49,8 +50,7 @@ def parse_args():
                         help="Disable scale in coupling layers.")
     parser.add_argument("--cnf_noscaletest", action="store_true",
                         help="Disable scale in coupling layers only at test time.")
-
-    args = parser.parse_args()
+    args = parser.parse_args(args=args)
 
     return args
 
