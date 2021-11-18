@@ -14,7 +14,9 @@
   - [ ] linear interpolation
 - [ ] 模型方法
   - [x] SRCNN, single img(ECCV 2014)
-  - [ ] 
+  - [ ] 其他更fancy/SOTA的算法
+- [ ] 提高框架的使用性
+  - [ ] 更好的log方式
 
 
 # 使用方法
