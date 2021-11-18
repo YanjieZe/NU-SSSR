@@ -9,14 +9,24 @@
 
 # To Do List
 - [ ] 采样
-- [ ] 网络结构
+  - [x] Center
+  - [x] Vertex
+  - [ ] linear interpolation
+- [ ] 模型方法
+  - [x] SRCNN, single img(ECCV 2014)
+  - [ ] 
 
 
 # 使用方法
-Sample.
+首先下载数据集，在release里面。然后可以通过`--data_root`指定你放数据的地方。
+
+然后训练模型：
 ```
-python sample.py 
+python train.py --alg SRCNN
 ```
+更多的参数设置请查看`arguments.py`。在`scripts/`目录下面有一些实例脚本，可以先尝试。
+
+
 
 # 记录 & 进度
 # 介绍
@@ -45,12 +55,19 @@ Input: img_origin
 2. Input img_sampled into SuperResolution Network and get img_reconstructed.
 ```
 
+## 数据集
+Set14, [link](https://deepai.org/dataset/set14-super-resolution)
+
 ## 采样
 原图：
 ![](imgs/img_origin.jpeg)
 首先使用Voronoi-Delaunay进行三角采样，获得如下图所示的结果：
 ![](imgs/delaunay.jpg)
 
+## Backbone/Baseline
+1. SRCNN, ECCV 2014, [link](https://github.com/yjn870/SRCNN-pytorch)
+2. 
 
 # 参考
-1. Neural supersampling for real-time rendering, 2020
+1. Neural supersampling for real-time rendering, 2020, [link](https://research.fb.com/wp-content/uploads/2020/06/Neural-Supersampling-for-Real-time-Rendering.pdf)
+2. A review, [link](https://cseweb.ucsd.edu/~ravir/tianchengsiga.pdf)
