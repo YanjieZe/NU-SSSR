@@ -37,6 +37,21 @@ def make_model(args):
     elif model_name=='SRCNN2':
         from models import SRCNN2
         return SRCNN2(args)
+    elif model_name == 'CNF':
+        from models import condNF
+        return condNF.FlowModel(
+            (3, args.img_height, args.img_width),
+            args.cnf_filter_size,
+            args.cnf_L,
+            args.cnf_K,
+            args.cnf_bsz,
+            1,
+            args.cnf_nb,
+            args.cnf_condch,
+            args.cnf_nbits,
+            args.cnf_noscale,
+            args.cnf_noscaletest,
+        )
     else:
         raise NotImplemented('Model %s is not implemented.'%model_name)
 

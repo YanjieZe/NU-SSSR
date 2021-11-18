@@ -4,9 +4,10 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # basic
-    parser.add_argument('--alg', default='SRCNN2', choices=['SRCNN', 'SRCNN2'])
+    parser.add_argument('--alg', default='SRCNN2', choices=['SRCNN', 'SRCNN2', "CNF"])
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
+    parser.add_argument('--device', default="gpu", type=str)
 
     # sampling
     parser.add_argument('--method', default='center', choices=['center', 'random', 'vertex'], help='method of sampling in the triangle')
@@ -31,6 +32,24 @@ def parse_args():
     parser.add_argument('--wandb_group', default=None, type=str)
     parser.add_argument('--wandb_job', default=None, type=str)
     parser.add_argument('--wandb_key', default=None, type=str)
+
+    # CNF Model
+    parser.add_argument("--cnf_filter_size", type=int, default=512,
+                        help="filter size NN in Affine Coupling Layer")
+    parser.add_argument("--cnf_L", type=int, default=2, help="# of levels")
+    parser.add_argument("--cnf_K", type=int, default=8,
+                        help="# of flow steps, i.e. model depth")
+    parser.add_argument("--cnf_bsz", type=int, default=128, help="batch size")
+    parser.add_argument("--cnf_nb", type=int, default=16,
+                        help="# of residual-in-residual blocks LR network.")
+    parser.add_argument("--cnf_condch", type=int, default=128,
+                        help="# of residual-in-residual blocks in LR network.")
+    parser.add_argument("--cnf_nbits", type=int, default=8,
+                        help="Images converted to n-bit representations.")
+    parser.add_argument("--cnf_noscale", action="store_true",
+                        help="Disable scale in coupling layers.")
+    parser.add_argument("--cnf_noscaletest", action="store_true",
+                        help="Disable scale in coupling layers only at test time.")
 
     args = parser.parse_args()
 

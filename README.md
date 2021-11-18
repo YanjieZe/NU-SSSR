@@ -15,6 +15,7 @@
   - [ ] linear interpolation
 - [ ] 模型方法
   - [x] SRCNN, single img(ECCV 2014)
+  - [x] CNF, SISR
   - [ ] 其他更fancy/SOTA的算法
 - [ ] 提高框架的使用性
   - [ ] 更好的log方式
@@ -79,3 +80,4 @@ Set14, [link](https://deepai.org/dataset/set14-super-resolution)
 # 参考
 1. Neural supersampling for real-time rendering, 2020, [link](https://research.fb.com/wp-content/uploads/2020/06/Neural-Supersampling-for-Real-time-Rendering.pdf)
 2. A review, [link](https://cseweb.ucsd.edu/~ravir/tianchengsiga.pdf)
+3. Learning Likelihoods with Conditional Normalizing Flows, 2019, [link](http://arxiv.org/abs/1912.00042)
