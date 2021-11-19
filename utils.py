@@ -66,7 +66,10 @@ def save_model(model, epoch, args):
 
 def load_model(model, epoch, args):
     save_path = os.path.join(args.log_dir, args.alg+'_'+str(epoch)+'.pth')
-    model.load_state_dict(torch.load(save_path))
+    if not torch.cuda.is_available():
+        model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
+    else:
+        model.load_state_dict(torch.load(save_path))
     
 def collect_function(batch):
     img_pair = dict()
