@@ -39,6 +39,8 @@ def make_model(args):
     elif model_name=='SRCNN2':
         from models import SRCNN2
         return SRCNN2(args)
+    elif model_name=='GAN':
+        from models import GAN
     elif model_name == 'CNF':
         from models import condNF
         return condNF.FlowModel(
