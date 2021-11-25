@@ -16,6 +16,7 @@
 - [ ] 模型方法
   - [x] Super Resoultion CNN (SRCNN), for single img (ECCV 2014)
   - [x] Conditional Normalizing Flows (CNF), for single img (ICLR 2020)
+  - [x] VDSR
   - [ ] 其他更fancy/SOTA的算法
 - [ ] 提高框架的使用性
   - [ ] 更好的log方式
@@ -43,6 +44,18 @@ python train.py --alg SRCNN
 
 # 方法
 
+# 记录：
+Model: SRCNN, VDSR
+Dataset: mini-Set5, celebA
+Result:
+- Set5: Loss在~200 iter后loss趋于稳定，不断抖动，不再降低，模型饱和。Reconstruct出来的Image基本上就是Delaunay采样生成的图片加上高斯模糊得到，几乎没有细节和形状上的纠正
+- ![loss-set5](imgs/loss-set5.png)
+- celebA: (相比Set5，Domain更加集中，数据量更大) Loss在~5000 iter后趋于稳定，但仍有一定的下降趋势。Reconstruction效果不错，在高斯模糊的基础上还有一定的细节补充和形状纠正
+- ![loss-celebA](imgs/loss-set5.png)
+可能的提升点:
+  1. 模型容量的问题 (为了让我的2G显存装得下，极大地削减了VDSR的表达能力) TODO: ZYJ在服务器上训VDSR(未削减版) + celebA
+  2. CNN本身不鼓励清晰的细节 TODO: Canny Edge处理，加入针对Edge的loss; 学习TecoGAN等方法
+   
 ## 算法流水线
 training:
 ```
@@ -61,7 +74,7 @@ Input: img_origin
 
 ## 数据集
 Set14, [link](https://deepai.org/dataset/set14-super-resolution)
-
+celebA, [link](https://jbox.sjtu.edu.cn/l/U1y10y)
 ## 采样
 原图：
 ![](imgs/img_origin.jpeg)
