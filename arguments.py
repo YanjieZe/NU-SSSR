@@ -4,7 +4,7 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser()
 
     # basic
-    parser.add_argument('--alg', default='GAN', choices=['SRCNN', 'SRCNN2', 'GAN', "CNF", "VDSR"])
+    parser.add_argument('--alg', default='CycleGAN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', "CNF", "VDSR"])
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--device', default="gpu", type=str)
@@ -15,7 +15,7 @@ def parse_args(args=None):
 
     # train
     parser.add_argument('--lr', default=1e-3, type=float)
-    parser.add_argument('--epoch', default=20)
+    parser.add_argument('--epoch', default=20, type=int)
     parser.add_argument('--batch_size', default=4, type=int)
     parser.add_argument('--num_workers', default=0, type=int)
     parser.add_argument('--img_width',default=256, type=int)
