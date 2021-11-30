@@ -77,7 +77,14 @@ def load_model(model, epoch, args):
         model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
     else:
         model.load_state_dict(torch.load(save_path))
-    
+
+def load_model_with_name(model, name, epoch, args):
+    save_path = os.path.join(args.log_dir, args.alg+'_' + name+'_'+args.description+'_'+str(epoch)+'.pth')
+    if not torch.cuda.is_available():
+        model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
+    else:
+        model.load_state_dict(torch.load(save_path))
+
 def collect_function(batch):
     img_pair = dict()
     for idx, pair in enumerate(batch):
@@ -112,6 +119,29 @@ def show_gt_and_pred(img_hr, img_lr, pred_hr, figsize):
 
     plt.show()
 
+
+def show_real_and_fake(realA, fakeA, realB, fakeB, id):
+    plt.figure(1)
+    plt.subplot(2, 2, 1) 
+    plt.imshow(realA)
+    plt.title('real A')
+
+    plt.figure(1)
+    plt.subplot(2, 2, 2)
+    plt.imshow(fakeA)
+    plt.title('fake A')
+
+    plt.figure(1)
+    plt.subplot(2, 2, 3)
+    plt.imshow(realB)
+    plt.title('real B')
+
+    plt.figure(1)
+    plt.subplot(2, 2, 4)
+    plt.imshow(fakeB)
+    plt.title('fake B')
+    plt.savefig("imgs/pred_cycleGAN_epoch40_%u.png"%id)
+    # plt.show()
 
 
 class TrainDataset(Dataset):

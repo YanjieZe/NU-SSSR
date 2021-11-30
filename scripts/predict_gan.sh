@@ -1,0 +1,1 @@
+python predict_gan.py --log_dir logs/CycleGAN

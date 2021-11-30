@@ -63,7 +63,7 @@ class TrainDataset(Dataset):
 class TestDataset(Dataset):
     def __init__(self, args):
         self.args = args
-        self.root_path = os.path.join('data/set5_test/set5')
+        self.root_path = os.path.join('data/set5_test/Set5')
         self.img_list = os.listdir(self.root_path)
         try:
             self.img_list.remove('.DS_Store')

@@ -8,6 +8,10 @@
 
 ![](imgs/blur_point10000.png)
 
+使用cycleGAN的结果:
+
+![](imgs/pred_cycleGAN_epoch40_0.png)
+
 # To Do List
 - [ ] 采样
   - [x] Center
