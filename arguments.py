@@ -22,6 +22,7 @@ def parse_args(args=None):
     parser.add_argument('--img_height',default=256, type=int)
     parser.add_argument('--log_dir', default='logs', type=str)
     parser.add_argument('--description', default='', type=str)
+    parser.add_argument('--fifa', default=False, action='store_true', help="train style transfer for fifa project")
     
     # predict
     parser.add_argument('--predict_epoch', default=0, type=int, help="which epoch of weight you may use")

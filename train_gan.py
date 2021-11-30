@@ -8,9 +8,11 @@ import itertools
 import torch.optim as optim
 import torch.nn as nn
 import torch.utils.data as torch_data
+import torchvision.transforms as transforms
 from models import Generator, Discriminator
 import dataset_gan
 import tqdm
+from PIL import Image
 
 try:
 	import wandb
@@ -54,15 +56,28 @@ def train(args):
     optimizer_D_B = torch.optim.Adam(netD_B.parameters(), lr=args.lr, betas=(0.5, 0.999))
 
     # dataset
-    train_dataset = dataset_gan.TrainDataset(args)
-    train_loader = torch_data.DataLoader(dataset=train_dataset,
-                                  batch_size=args.batch_size,
-                                  shuffle=True,
-                                  num_workers=args.num_workers,
-                                  pin_memory=True,
-                                  drop_last=True,
-                                  collate_fn=utils.collect_function)
+    if not args.fifa:
+        train_dataset = dataset_gan.TrainDataset(args)
+        train_loader = torch_data.DataLoader(dataset=train_dataset,
+                                    batch_size=args.batch_size,
+                                    shuffle=True,
+                                    num_workers=args.num_workers,
+                                    pin_memory=True,
+                                    drop_last=True,
+                                    collate_fn=utils.collect_function)
+    else:
+        train_dataset = dataset_gan.ImageDataset(root='data/fifa2real',
+                        transform=transforms.Compose([
+                            transforms.Resize(int(args.img_width * 1.12), Image.BICUBIC),
+                            transforms.RandomCrop(args.img_width),
+                            transforms.RandomHorizontalFlip(),
+                            transforms.ToTensor(),
+                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]),
+                        unaligned=True)
+
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, pin_memory=True)
         
+
     g_losses = []
     d_losses = []
 
@@ -82,8 +97,13 @@ def train(args):
         for idx, data in progress_bar:
             
             # fetch data
-            real_image_A = data["hr"].to(device)
-            real_image_B = data["lr"].to(device)
+            if not args.fifa:
+                real_image_A = data["hr"].to(device)
+                real_image_B = data["lr"].to(device)
+            else:
+                real_image_A = data["A"].to(device)
+                real_image_B = data["B"].to(device)
+                
             batch_size = real_image_A.size(0)
 
             # real data label is 1, fake data label is 0.
