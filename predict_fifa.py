@@ -32,8 +32,8 @@ def show_real_and_fake(realA, fakeA, realB, fakeB, epoch, id):
 
     plt.figure(1)
     plt.subplot(2, 2, 2)
-    plt.imshow(fakeA)
-    plt.title('fake A')
+    plt.imshow(fakeB)
+    plt.title('generate fake B from real A')
 
     plt.figure(1)
     plt.subplot(2, 2, 3)
@@ -42,8 +42,8 @@ def show_real_and_fake(realA, fakeA, realB, fakeB, epoch, id):
 
     plt.figure(1)
     plt.subplot(2, 2, 4)
-    plt.imshow(fakeB)
-    plt.title('fake B')
+    plt.imshow(fakeA)
+    plt.title('generate fake A from real B')
 
     plt.subplots_adjust(wspace =0.3, hspace =0.3)
 
@@ -71,28 +71,55 @@ def predict(args, epoch):
     #                               collate_fn=utils.collect_function)
 
     # use train set
+    use_single = False
+    use_random = False
+    
+    if not use_single:
+        train_dataset = dataset_gan.ImageDataset(root='data/fifa2real',
+                            transform=transforms.Compose([
+                                transforms.Resize(int(args.img_width * 1.12), Image.BICUBIC),
+                                transforms.RandomCrop(args.img_width),
+                                transforms.RandomHorizontalFlip(),
+                                transforms.ToTensor(),
+                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]),
+                            unaligned=False) # set this to false to use consistent img
+        if use_random:
+            idx = np.random.randint(0, len(train_dataset))
+        else:
+            idx = 2
+        print('use img idx:%u'%idx)
 
-    pathA = 'data/fifa2real/train/A/1.jpg'
-    pathB = 'data/fifa2real/train/B/3.jpg'
-    real_image_A = Image.open(pathA) # RGB
-    real_image_B = Image.open(pathB)
+        real_image_A = train_dataset[idx]['A'].unsqueeze(0)
 
-    image_size = (256,256)
+        real_image_B = train_dataset[idx]['B'].unsqueeze(0)
 
-    pre_process = transforms.Compose([transforms.Resize(image_size),
-                                    transforms.ToTensor(),
-                                    ])
-    real_image_A = pre_process(real_image_A).unsqueeze(0)
-    real_image_A = real_image_A.to(device)
-    real_image_B = pre_process(real_image_B).unsqueeze(0)
-    real_image_B = real_image_B.to(device)
+        real_image_A = real_image_A.to(device)
+        real_image_B = real_image_B.to(device)
+
+    else:
+
+
+        pathA = 'data/fifa2real/train/A/1.jpg'
+        pathB = 'data/fifa2real/train/B/3.jpg'
+        real_image_A = Image.open(pathA) # RGB
+        real_image_B = Image.open(pathB)
+
+        image_size = (256,256)
+
+        pre_process = transforms.Compose([transforms.Resize(image_size),
+                                        transforms.ToTensor(),
+                                        ])
+        real_image_A = pre_process(real_image_A).unsqueeze(0)
+        real_image_A = real_image_A.to(device)
+        real_image_B = pre_process(real_image_B).unsqueeze(0)
+        real_image_B = real_image_B.to(device)
 
 
     # create model
-    netG_A2B = Generator().to(device)
-    netG_B2A = Generator().to(device)
-    netD_A = Discriminator().to(device)
-    netD_B = Discriminator().to(device)
+    netG_A2B = Generator().to(device).float()
+    netG_B2A = Generator().to(device).float()
+    netD_A = Discriminator().to(device).float()
+    netD_B = Discriminator().to(device).float()
 
     # load weight
 
@@ -108,18 +135,24 @@ def predict(args, epoch):
 
     id = 1
     with torch.no_grad():
+        
         fake_image_B = 0.5*( netG_A2B(real_image_A).data + 1.0 )
         fake_image_A = 0.5 *( netG_B2A(real_image_B).data + 1.0 )
 
         # vutils.save_image(fake_image_A, 'test.jpg')
-        vutils.save_image(fake_image_A, 'imgs/fifa/test1.jpg', normalize=True)
-        vutils.save_image(fake_image_A, 'imgs/fifa/test2.jpg', normalize=True)
+        vutils.save_image(real_image_A, 'imgs/fifa/epoch%u_realA.jpg'%epoch, normalize=True)
+        vutils.save_image(fake_image_A, 'imgs/fifa/epoch%u_fakeA.jpg'%epoch, normalize=True)
+        vutils.save_image(real_image_B, 'imgs/fifa/epoch%u_realB.jpg'%epoch, normalize=True)
+        vutils.save_image(fake_image_B, 'imgs/fifa/epoch%u_fakeB.jpg'%epoch, normalize=True)
 
-        fake_image_A = Image.open('imgs/fifa/test1.jpg')
-        fake_image_B = Image.open('imgs/fifa/test2.jpg')
 
-        real_image_A = real_image_A[0].permute(1,2,0).cpu().numpy()
-        real_image_B = real_image_B[0].permute(1,2,0).cpu().numpy()
+        real_image_A = Image.open('imgs/fifa/epoch%u_realA.jpg'%epoch)
+        real_image_B = Image.open('imgs/fifa/epoch%u_realB.jpg'%epoch)
+
+        # real_image_A = real_image_A[0].permute(1,2,0).cpu().numpy()
+        # real_image_B = real_image_B[0].permute(1,2,0).cpu().numpy()
+        fake_image_A = fake_image_A[0].permute(1,2,0).cpu().numpy()
+        fake_image_B = fake_image_B[0].permute(1,2,0).cpu().numpy()
 
 
         # real_image_A = real_image_A[:, :, ::-1].copy() 
@@ -131,5 +164,6 @@ def predict(args, epoch):
 if __name__=='__main__':
     args = parse_args()
     print(args)
-    for e in [0, 100, 200]:
+    # for e in [0, 100, 200]:
+    for e in [0, 50, 100, 150, 200]:
         predict(args, e)
