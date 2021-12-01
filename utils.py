@@ -140,7 +140,7 @@ def show_real_and_fake(realA, fakeA, realB, fakeB, id):
     plt.subplot(2, 2, 4)
     plt.imshow(fakeB)
     plt.title('fake B')
-    plt.savefig("imgs/pred_cycleGAN_epoch40_%u.png"%id)
+    plt.savefig("imgs/fifa/pred_cycleGAN_epoch40_%u.png"%id)
     # plt.show()
 
 
