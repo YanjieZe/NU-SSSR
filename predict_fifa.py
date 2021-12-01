@@ -47,11 +47,11 @@ def show_real_and_fake(realA, fakeA, realB, fakeB, epoch, id):
 
     plt.subplots_adjust(wspace =0.3, hspace =0.3)
 
-    plt.savefig("imgs/fifa/pred_cycleGAN_epoch%u_%u.png"%( epoch, id ))
+    plt.savefig("imgs/fifa/train_cycleGAN_epoch%u_%u.png"%( epoch, id ))
     # plt.show()
 
 
-def predict(args):
+def predict(args, epoch):
     utils.set_seed_everywhere(args.seed)
 
     if args.wandb:
@@ -72,8 +72,8 @@ def predict(args):
 
     # use train set
 
-    pathA = 'data/fifa2real/test/A/2701.jpg'
-    pathB = 'data/fifa2real/test/B/602.jpg'
+    pathA = 'data/fifa2real/train/A/1.jpg'
+    pathB = 'data/fifa2real/train/B/3.jpg'
     real_image_A = Image.open(pathA) # RGB
     real_image_B = Image.open(pathB)
 
@@ -95,8 +95,9 @@ def predict(args):
     netD_B = Discriminator().to(device)
 
     # load weight
-    epoch = args.predict_epoch
-    epoch = 130
+
+
+    print('epoch is:', epoch)
     args.log_dir = 'logs/cycleGAN_fifa'
     utils.load_model_with_name(netG_A2B, 'A2B', epoch, args)
     utils.load_model_with_name(netG_B2A, 'B2A', epoch, args)
@@ -107,8 +108,8 @@ def predict(args):
 
     id = 1
     with torch.no_grad():
-        fake_image_B = netG_A2B(real_image_A)
-        fake_image_A = netG_B2A(real_image_B)
+        fake_image_B = 0.5*( netG_A2B(real_image_A).data + 1.0 )
+        fake_image_A = 0.5 *( netG_B2A(real_image_B).data + 1.0 )
 
         # vutils.save_image(fake_image_A, 'test.jpg')
         vutils.save_image(fake_image_A, 'imgs/fifa/test1.jpg', normalize=True)
@@ -130,4 +131,5 @@ def predict(args):
 if __name__=='__main__':
     args = parse_args()
     print(args)
-    predict(args)
+    for e in [0, 100, 200]:
+        predict(args, e)
