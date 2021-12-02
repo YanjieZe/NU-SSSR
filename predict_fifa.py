@@ -47,7 +47,8 @@ def show_real_and_fake(realA, fakeA, realB, fakeB, epoch, id):
 
     plt.subplots_adjust(wspace =0.3, hspace =0.3)
 
-    plt.savefig("imgs/fifa/train_cycleGAN_epoch%u_%u.png"%( epoch, id ))
+    plt.suptitle("epoch %u"%epoch)
+    plt.savefig("imgs/fifa_clean1/train_cycleGAN_epoch%u_%u.png"%( epoch, id ))
     # plt.show()
 
 
@@ -86,7 +87,7 @@ def predict(args, epoch):
         if use_random:
             idx = np.random.randint(0, len(train_dataset))
         else:
-            idx = 2
+            idx = 3
         print('use img idx:%u'%idx)
 
         real_image_A = train_dataset[idx]['A'].unsqueeze(0)
@@ -140,14 +141,14 @@ def predict(args, epoch):
         fake_image_A = 0.5 *( netG_B2A(real_image_B).data + 1.0 )
 
         # vutils.save_image(fake_image_A, 'test.jpg')
-        vutils.save_image(real_image_A, 'imgs/fifa/epoch%u_realA.jpg'%epoch, normalize=True)
-        vutils.save_image(fake_image_A, 'imgs/fifa/epoch%u_fakeA.jpg'%epoch, normalize=True)
-        vutils.save_image(real_image_B, 'imgs/fifa/epoch%u_realB.jpg'%epoch, normalize=True)
-        vutils.save_image(fake_image_B, 'imgs/fifa/epoch%u_fakeB.jpg'%epoch, normalize=True)
+        vutils.save_image(real_image_A, 'imgs/fifa_clean1/epoch%u_realA.jpg'%epoch, normalize=True)
+        vutils.save_image(fake_image_A, 'imgs/fifa_clean1/epoch%u_fakeA.jpg'%epoch, normalize=True)
+        vutils.save_image(real_image_B, 'imgs/fifa_clean1/epoch%u_realB.jpg'%epoch, normalize=True)
+        vutils.save_image(fake_image_B, 'imgs/fifa_clean1/epoch%u_fakeB.jpg'%epoch, normalize=True)
 
 
-        real_image_A = Image.open('imgs/fifa/epoch%u_realA.jpg'%epoch)
-        real_image_B = Image.open('imgs/fifa/epoch%u_realB.jpg'%epoch)
+        real_image_A = Image.open('imgs/fifa_clean1/epoch%u_realA.jpg'%epoch)
+        real_image_B = Image.open('imgs/fifa_clean1/epoch%u_realB.jpg'%epoch)
 
         # real_image_A = real_image_A[0].permute(1,2,0).cpu().numpy()
         # real_image_B = real_image_B[0].permute(1,2,0).cpu().numpy()
