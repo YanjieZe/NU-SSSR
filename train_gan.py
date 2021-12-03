@@ -207,6 +207,11 @@ def train(args):
             else:
                 pass
 
+        # Update learning rates
+        lr_scheduler_G.step()
+        lr_scheduler_D_A.step()
+        lr_scheduler_D_B.step()
+        
         if epoch%10==0:
             utils.save_model_with_name(netG_A2B, 'A2B', epoch, args)
             utils.save_model_with_name(netG_B2A, 'B2A', epoch, args)

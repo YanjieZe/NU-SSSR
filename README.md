@@ -20,14 +20,13 @@
 - [ ] 模型方法
   - [x] Super Resoultion CNN (SRCNN), for single img (ECCV 2014)
   - [x] Conditional Normalizing Flows (CNF), for single img (ICLR 2020)
-  - [ ] multi-frame SRCNN (MSRCNN)，自己编的一个模型。实现思路，多张图片输入，先encode一下，然后再输入SRCNN。要改一下dataset的定义。
-  - [ ] GAN/cycleGAN (目前加了模型，但是还没有想好怎么做，直接img-to-img translation 似乎没有必要)
+  - [x] GAN/cycleGAN (目前加了模型，但是还没有想好怎么做，直接img-to-img translation 似乎没有必要)
   - [ ] 其他更fancy/SOTA的算法
-- [ ] 提高框架的使用性
-  - [ ] 更好的log方式
-- [ ] 报告
+- [x] 提高框架的使用性
+  - [x] 更好的log方式
+- [x] 报告
   - [x] 报告框架
-  - [ ] 相关工作
+  - [x] 相关工作
 
 
 
