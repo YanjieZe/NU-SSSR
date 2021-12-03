@@ -23,7 +23,8 @@ def parse_args(args=None):
     parser.add_argument('--log_dir', default='logs', type=str)
     parser.add_argument('--description', default='', type=str)
     parser.add_argument('--fifa', default=False, action='store_true', help="train style transfer for fifa project")
-    
+    parser.add_argument("--decay_epochs", type=int, default=100,
+                    help="epoch to start linearly decaying the learning rate to 0. (default:100)")
     # predict
     parser.add_argument('--predict_epoch', default=0, type=int, help="which epoch of weight you may use")
     

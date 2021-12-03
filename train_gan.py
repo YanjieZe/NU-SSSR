@@ -21,6 +21,18 @@ except:
 	pass
 
 
+class DecayLR:
+    def __init__(self, epochs, offset, decay_epochs):
+        epoch_flag = epochs - decay_epochs
+        assert (epoch_flag > 0), "Decay must start before the training session ends!"
+        self.epochs = epochs
+        self.offset = offset
+        self.decay_epochs = decay_epochs
+
+    def step(self, epoch):
+        return 1.0 - max(0, epoch + self.offset - self.decay_epochs) / (
+                self.epochs - self.decay_epochs)
+
 def train(args):
     utils.set_seed_everywhere(args.seed)
 
@@ -54,6 +66,11 @@ def train(args):
                                 lr=args.lr, betas=(0.5, 0.999))
     optimizer_D_A = torch.optim.Adam(netD_A.parameters(), lr=args.lr, betas=(0.5, 0.999))
     optimizer_D_B = torch.optim.Adam(netD_B.parameters(), lr=args.lr, betas=(0.5, 0.999))
+
+    lr_lambda = DecayLR(args.epoch, 0, args.decay_epochs).step
+    lr_scheduler_G = torch.optim.lr_scheduler.LambdaLR(optimizer_G, lr_lambda=lr_lambda)
+    lr_scheduler_D_A = torch.optim.lr_scheduler.LambdaLR(optimizer_D_A, lr_lambda=lr_lambda)
+    lr_scheduler_D_B = torch.optim.lr_scheduler.LambdaLR(optimizer_D_B, lr_lambda=lr_lambda)
 
     # dataset
     if not args.fifa:
@@ -211,7 +228,7 @@ def train(args):
         lr_scheduler_G.step()
         lr_scheduler_D_A.step()
         lr_scheduler_D_B.step()
-        
+
         if epoch%10==0:
             utils.save_model_with_name(netG_A2B, 'A2B', epoch, args)
             utils.save_model_with_name(netG_B2A, 'B2A', epoch, args)
