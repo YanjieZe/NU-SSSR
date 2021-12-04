@@ -1,4 +1,4 @@
-python train_gan.py --alg CycleGAN \
+python train_cyclegan.py --alg CycleGAN \
                     --epoch 50 \
                     --seed 0 \
                     --log_dir logs/CycleGAN \

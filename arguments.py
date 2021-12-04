@@ -1,10 +1,10 @@
 import argparse
 
-def parse_args(args=None):
+def parse_args():
     parser = argparse.ArgumentParser()
 
     # basic
-    parser.add_argument('--alg', default='CycleGAN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', "CNF", "VDSR"])
+    parser.add_argument('--alg', default='CycleGAN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', 'CUT',  "CNF", "VDSR"])
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--device', default="gpu", type=str)
@@ -59,3 +59,5 @@ def parse_args(args=None):
 
 
 
+
+    

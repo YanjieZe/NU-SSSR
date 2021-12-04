@@ -1,1 +1,1 @@
-python predict_gan.py --log_dir logs/CycleGAN
+python predict_cyclegan.py --log_dir logs/CycleGAN
