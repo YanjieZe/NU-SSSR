@@ -43,7 +43,10 @@ def predict(args):
 
 
     model.eval()
+    figsize = (args.img_width, args.img_width)
     for idx, img_pair in enumerate(test_loader):
+        if idx<=2:
+            continue
         with torch.no_grad():
             img_hr = img_pair['hr'].to(device)
             img_lr = img_pair['lr'].to(device)
@@ -51,11 +54,12 @@ def predict(args):
             img_predict = model(img_lr)
 
             for i in range(args.batch_size):
-                hr = img_hr[i].permute(1,2,0)
-                lr = img_lr[i].permute(1,2,0)
-                pred_hr = img_predict[i].permute(1,2,0)
-                utils.show_gt_and_pred(img_hr=hr, img_lr=lr, pred_hr=pred_hr)
-
+                print(i)
+                hr = img_hr[i].permute(1,2,0).cpu()
+                lr = img_lr[i].permute(1,2,0).cpu()
+                pred_hr = img_predict[i].permute(1,2,0).cpu()
+                utils.show_gt_and_pred(img_hr=hr, img_lr=lr, pred_hr=pred_hr, save_name='imgs/cg/%s_epoch%s_point%u_%u.jpg'%(args.alg, epoch, args.point_num,i))
+                # break
             loss = loss_function(img_hr, img_predict)
         
             print('idx: %u | loss:%f |'%(idx, loss.item()) )

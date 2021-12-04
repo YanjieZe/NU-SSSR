@@ -72,12 +72,18 @@ def save_model_with_name(model, name, epoch, args):
 
 
 def load_model(model, epoch, args):
-    save_path = os.path.join(args.log_dir, args.alg+'_'+str(epoch)+'.pth')
-    if not torch.cuda.is_available():
-        model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
-    else:
-        model.load_state_dict(torch.load(save_path))
-
+    try:
+        save_path = os.path.join(args.log_dir, args.alg+'_'+str(epoch)+'.pth')
+        if not torch.cuda.is_available():
+            model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
+        else:
+            model.load_state_dict(torch.load(save_path))
+    except:
+        save_path = os.path.join(args.log_dir, args.alg+'__'+str(epoch)+'.pth')
+        if not torch.cuda.is_available():
+            model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
+        else:
+            model.load_state_dict(torch.load(save_path))
 def load_model_with_name(model, name, epoch, args):
     save_path = os.path.join(args.log_dir, args.alg+'_' + name+'_'+args.description+'_'+str(epoch)+'.pth')
     if not torch.cuda.is_available():
@@ -101,23 +107,24 @@ def collect_function(batch):
 
     return img_pair
 
-def show_gt_and_pred(img_hr, img_lr, pred_hr, figsize):
-    plt.figure(1, figsize=figsize)
+def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name):
+    plt.figure(1)
     plt.subplot(1, 3, 1) #图一包含1行2列子图，当前画在第一行第一列图上
     plt.imshow(img_hr)
     plt.title('ground truth hr')
 
-    plt.figure(1, figsize=figsize)
+    plt.figure(1)
     plt.subplot(1, 3, 2) #图一包含1行2列子图，当前画在第一行第一列图上
     plt.imshow(img_lr)
     plt.title('ground truth lr')
 
-    plt.figure(1, figsize=figsize)
+    plt.figure(1)
     plt.subplot(1, 3, 3)#当前画在第一行第2列图上
     plt.imshow(pred_hr)
     plt.title('predict hr')
 
-    plt.show()
+    # plt.show()
+    plt.savefig(save_name)
 
 
 def show_real_and_fake(realA, fakeA, realB, fakeB, id):

@@ -4,7 +4,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # basic
-    parser.add_argument('--alg', default='CycleGAN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', 'CUT',  "CNF", "VDSR"])
+    parser.add_argument('--alg', default='SRCNN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', 'CUT',  "CNF", "VDSR"], type=str)
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--device', default="gpu", type=str)
@@ -53,7 +53,7 @@ def parse_args():
     parser.add_argument("--cnf_noscaletest", action="store_true",
                         help="Disable scale in coupling layers only at test time.")
 
-    args = parser.parse_args(args=args)
+    args = parser.parse_args()
 
     return args
 

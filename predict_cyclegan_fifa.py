@@ -48,7 +48,7 @@ def show_real_and_fake(realA, fakeA, realB, fakeB, epoch, id):
     plt.subplots_adjust(wspace =0.3, hspace =0.3)
 
     plt.suptitle("epoch %u"%epoch)
-    plt.savefig("imgs/fifa_clean1/train_cycleGAN_epoch%u_%u.png"%( epoch, id ))
+    plt.savefig("imgs/fifa_lr_schedule/train_cycleGAN_epoch%u_%u.png"%( epoch, id ))
     # plt.show()
 
 
@@ -126,7 +126,7 @@ def predict(args, epoch):
 
 
     print('epoch is:', epoch)
-    args.log_dir = 'logs/cycleGAN_fifa'
+    args.log_dir = 'logs/cycleGAN_fifa_lr_schedule'
     utils.load_model_with_name(netG_A2B, 'A2B', epoch, args)
     utils.load_model_with_name(netG_B2A, 'B2A', epoch, args)
     utils.load_model_with_name(netD_A, 'DA', epoch, args)

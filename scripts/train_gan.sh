@@ -1,5 +1,5 @@
 python train_cyclegan.py --alg CycleGAN \
-                    --epoch 50 \
+                    --epoch 201 \
                     --seed 0 \
                     --log_dir logs/CycleGAN \
                     --wandb \
