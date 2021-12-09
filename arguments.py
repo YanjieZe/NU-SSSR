@@ -1,7 +1,7 @@
 import argparse
 
-def parse_args():
-    parser = argparse.ArgumentParser()
+def parse_args(input_arg=None):
+    parser = argparse.ArgumentParser(input_arg)
 
     # basic
     parser.add_argument('--alg', default='SRCNN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', 'CUT',  "CNF", "VDSR"], type=str)

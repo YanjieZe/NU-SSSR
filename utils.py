@@ -10,6 +10,8 @@ import torch
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 from torch.autograd import Variable
+from torchvision.transforms import ToTensor, ToPILImage
+
 
 def set_seed_everywhere(seed):
     torch.manual_seed(seed)
@@ -84,6 +86,7 @@ def load_model(model, epoch, args):
             model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
         else:
             model.load_state_dict(torch.load(save_path))
+
 def load_model_with_name(model, name, epoch, args):
     save_path = os.path.join(args.log_dir, args.alg+'_' + name+'_'+args.description+'_'+str(epoch)+'.pth')
     if not torch.cuda.is_available():
@@ -360,3 +363,23 @@ def weights_init(m):
     elif classname.find("BatchNorm") != -1:
         torch.nn.init.normal_(m.weight, 1.0, 0.02)
         torch.nn.init.zeros_(m.bias)
+
+class TrainDataset_PictureOnly(Dataset):
+    def __init__(self, args):
+        self.args = args
+        self.root_path = os.path.join(args.data_root, 'train')
+        self.img_list = os.listdir(self.root_path)
+        try:
+            self.img_list.remove('.DS_Store')
+        except:
+            pass
+    
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.root_path, self.img_list[idx])
+        img_raw = Image.open(img_path)
+        img = img_raw.resize((256, 256))
+        img = ToTensor()(img)
+        return img
+    
+    def __len__(self):
+        return len(self.img_list)
