@@ -4,7 +4,7 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser()
 
     # basic
-    parser.add_argument('--alg', default='SRCNN2', choices=['SRCNN', 'SRCNN2', "CNF", "VDSR"])
+    parser.add_argument('--alg', default='SRCNN2', choices=['SRCNN', 'SRCNN2', "CNF", "VDSR", "MAE"])
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--device', default="gpu", type=str)

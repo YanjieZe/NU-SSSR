@@ -10,6 +10,8 @@ import torch
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 from torch.autograd import Variable
+import numba as nb
+from torchvision.transforms import ToTensor, ToPILImage
 
 def set_seed_everywhere(seed):
     torch.manual_seed(seed)
@@ -150,6 +152,28 @@ class TrainDataset(Dataset):
         img_pair['lr'] /= 255
 
         return img_pair
+    
+    def __len__(self):
+        return len(self.img_list)
+
+
+
+class TrainDataset_PictureOnly(Dataset):
+    def __init__(self, args):
+        self.args = args
+        self.root_path = os.path.join(args.data_root, 'train')
+        self.img_list = os.listdir(self.root_path)
+        try:
+            self.img_list.remove('.DS_Store')
+        except:
+            pass
+    
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.root_path, self.img_list[idx])
+        img_raw = Image.open(img_path)
+        img = img_raw.resize((256, 256))
+        img = ToTensor()(img)
+        return img
     
     def __len__(self):
         return len(self.img_list)
