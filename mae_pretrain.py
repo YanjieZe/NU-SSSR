@@ -15,10 +15,7 @@ import PIL
 import numpy as np
 import matplotlib.pyplot as plt
 import tqdm
-try:
-    import wandb
-except:
-    pass
+
 
 
 class LossLogger(object):
@@ -122,7 +119,7 @@ for epoch in range(100):
         optimizer.step()
         scheduler.step()
 
-        wandb.log({'loss':loss.item()})
+        wandb.log({'train/loss':loss.item()})
 
         lr_list.append(optimizer.state_dict()['param_groups'][0]['lr'])
         
