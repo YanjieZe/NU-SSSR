@@ -77,6 +77,11 @@ Set14, [link](https://deepai.org/dataset/set14-super-resolution)
 首先使用Voronoi-Delaunay进行三角采样，获得如下图所示的结果：
 ![](imgs/delaunay.jpg)
 
+考虑用多种方法采样：
+1. 先随机采点，再三角化，再取三角中心的颜色作为该三角的值（已实现）
+2. 先进行傅里叶变换，在高频处（细节）多采样，在低频处少采样。再三角化，再取三角中心的颜色作为该三角的值。（待实现）
+
+
 ## Backbone/Baseline
 1.SRCNN, ECCV 2014, [link](https://github.com/yjn870/SRCNN-pytorch)
 下面两幅图分别是SRCNN和SRCNN2在一个epoch后进行预测的结果。说明了只增加网络宽度和深度后，模型拟合会更慢，会导致算法效果变差。但是在很多个epoch后是否还会这样不清楚。
