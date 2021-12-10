@@ -93,39 +93,24 @@ args.alg = 'mae'
 args.log_dir = 'logs/mae'
 
 args.wandb_project = "CG"
-args.wandb_group = "mae_large"
+args.wandb_group = "mae"
 args.wandb_name = str(271828)
 
 import wandb
-wandb.init(project=args.wandb_project, name=args.wandb_name, \
-		    group=args.wandb_group, job_type=args.wandb_job)
+# wandb.init(project=args.wandb_project, name=args.wandb_name, \
+# 		    group=args.wandb_group, job_type=args.wandb_job)
 
-for epoch in range(100):
+epoch = 90
+utils.load_model_with_name(model, '', epoch, args)
+
+for e in range(100):
     idx = random.randint(0, len(train_dataset)-1)
     img = train_dataset[idx].unsqueeze(0).to(device)
     recons_img, patches_to_img = model.predict(img)
     recons_img = recons_img[0].permute(1, 2, 0).cpu().numpy()
     patches_to_img = patches_to_img[0].permute(1, 2, 0).cpu().numpy()
     img_gt = img[0].permute(1, 2, 0).cpu().numpy()
-    # utils.show_gt_and_pred(img_hr=img_gt, img_lr=patches_to_img, pred_hr=recons_img, figsize=(30, 30))
+    utils.show_gt_and_pred(img_hr=img_gt, img_lr=patches_to_img, pred_hr=recons_img, save_name="imgs/cg/mae_%u.jpg"%epoch)
     
-    loop = tqdm.tqdm(train_loader)
-    for idx, img in enumerate(loop):
-        img = img.to(device)
-        loss = model(img)
-            
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        scheduler.step()
-
-        wandb.log({'train/loss':loss.item()})
-
-        lr_list.append(optimizer.state_dict()['param_groups'][0]['lr'])
-        
-        logger.push(loss.item())
-        loop.set_description(f"epoch: {e} | iter: {idx}/{len(train_dataset)} | loss: {logger.loss}")
-    e += 1
-
-    if epoch%10==0:
-        utils.save_model_with_name(model, '', epoch, args)
+    break
+    
