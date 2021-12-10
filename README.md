@@ -81,6 +81,26 @@ Set14, [link](https://deepai.org/dataset/set14-super-resolution)
 1. 先随机采点，再三角化，再取三角中心的颜色作为该三角的值（已实现）
 2. 先进行傅里叶变换，在高频处（细节）多采样，在低频处少采样。再三角化，再取三角中心的颜色作为该三角的值。（待实现）
 
+### 基于傅里叶变换的图像三角化
+超参数`frequency_domain_range`来判断高频和低频的分界线。超参数`frequency_sample_prob`来给所有高频点加一个概率来采样，不是所有都采。
+
+算法伪代码：
+1. 傅里叶变换，获得频域图。
+2. 将低频部分根据frequency_domain_range来mask掉。
+3. 逆变换，获得高频在时域的图。
+4. 对高频pixel采样，以frequency_sample_prob的概率采样。
+5. 再进行全局随机采样。
+6. 用4、5两步获得的采样点进行三角化。
+
+下图为频域可视化。
+![](imgs/fourier_domain.png)
+
+下图为傅里叶高频采样结果。
+![](imgs/fourier_triangulation.png)
+
+
+
+
 
 ## Backbone/Baseline
 1.SRCNN, ECCV 2014, [link](https://github.com/yjn870/SRCNN-pytorch)

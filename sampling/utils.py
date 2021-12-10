@@ -30,7 +30,6 @@ def show_img(img):
 
 def save_img(name, img):
     cv2.imwrite(name, img)
-    print("img %s saved"%name)
 
 
 def make_model(args):

@@ -5,6 +5,9 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from numpy import core
+import utils
+import tqdm
+
 # Check if a point is inside a rectangle
 def rect_contains(rect, point) :
     if point[0] < rect[0] :
@@ -86,12 +89,20 @@ def draw_voronoi(img, subdiv) :
         cv2.circle(img, (int(centers[i][0]), int(centers[i][1])), 3, (0, 0, 0), cv2.FILLED, cv2.LINE_AA, 0)
 
 
-def DelaunayTriangulationBlur(img, point_num=1000, method="center"):
+def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
+                        sample_point_method="fourier", 
+                        frequency_domain_range=20,
+                        frequency_sample_prob=0.1,
+                        ):
     """
     对img进行三角采样，并使用三角中的颜色进行填充，支持的颜色方法：
     center，取三角中心点;
     random，随机在三角形采样;
     vertex，取三角形点进行平均;
+
+    采样点的方法：
+    random，随机采样。
+    fourier，用傅里叶变换对高频点和低频点分别采样。
     """
     if img is None:
         raise Exception('Img can not be None.')
@@ -115,15 +126,64 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center"):
     subdiv = cv2.Subdiv2D(rect) 
     
     # Create an array of points.
-    points = set()
+    points = set() # 存储采样的点
     
-    # generate points randomly
-    width = img.shape[0]
-    height = img.shape[1]
-    for i in range(point_num):
-        x = np.random.randint(0, width)
-        y = np.random.randint(0, height)
-        points.add((y,x))
+    if sample_point_method=='random':
+        # generate points randomly
+        width = img.shape[0]
+        height = img.shape[1]
+        for i in range(point_num):
+            x = np.random.randint(0, width)
+            y = np.random.randint(0, height)
+            points.add((y,x))
+
+    elif sample_point_method=='fourier':
+        
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        f = np.fft.fft2(img_gray)
+        fshift = np.fft.fftshift(f)
+        magnitude_spectrum = 20*np.log(np.abs(fshift))
+
+        """draw img
+        plt.subplot(121),plt.imshow(img_gray, cmap = 'gray')
+        plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+        plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+        plt.suptitle("Fourier Transform")
+        plt.show()
+        """
+
+        rows, cols = img_gray.shape
+        crow,ccol = rows//2 , cols//2
+        frequency_domain_range = 20
+        fshift[crow-frequency_domain_range:crow+frequency_domain_range, ccol-frequency_domain_range:ccol+frequency_domain_range] = 0
+        
+        f_ishift = np.fft.ifftshift(fshift)
+        img_back = np.fft.ifft2(f_ishift)
+
+        img_back = np.real(img_back)
+        
+        #add the point (value>0)
+        x_cordinates, y_cordinates = np.where(img_back>0)
+
+        # fourier high frequency points
+        for x, y in zip(x_cordinates, y_cordinates):
+            if np.random.rand()>1.0-frequency_sample_prob:# randomly filter some points
+                points.add((y,x))    #  or (x,y) ?
+
+        # also some random points
+        width = img.shape[0]
+        height = img.shape[1]
+        for i in range(point_num):
+            x = np.random.randint(0, width)
+            y = np.random.randint(0, height)
+            points.add((y,x))
+
+        # utils.save_img("imgs/high_freq.jpg", img_back)
+
+
+
 
     # Insert points into subdiv
     for p in points :
