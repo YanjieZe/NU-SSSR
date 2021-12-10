@@ -66,6 +66,8 @@ def make_model(args):
         raise NotImplemented('Model %s is not implemented.'%model_name)
 
 def save_model(model, epoch, args):
+    if not os.path.exists(args.log_dir):
+        os.mkdir(args.log_dir)
     save_path = os.path.join(args.log_dir, args.alg+'_'+args.description+'_'+str(epoch)+'.pth')
     torch.save(model.state_dict(), save_path)
 
@@ -113,17 +115,17 @@ def collect_function(batch):
 
 def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name):
     plt.figure(1)
-    plt.subplot(1, 3, 1) #图一包含1行2列子图，当前画在第一行第一列图上
+    plt.subplot(1, 3, 1)
     plt.imshow(img_hr)
     plt.title('ground truth hr')
 
     plt.figure(1)
-    plt.subplot(1, 3, 2) #图一包含1行2列子图，当前画在第一行第一列图上
+    plt.subplot(1, 3, 2)
     plt.imshow(img_lr)
     plt.title('ground truth lr')
 
     plt.figure(1)
-    plt.subplot(1, 3, 3)#当前画在第一行第2列图上
+    plt.subplot(1, 3, 3)
     plt.imshow(pred_hr)
     plt.title('predict hr')
 

@@ -170,7 +170,7 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
         # fourier high frequency points
         for x, y in zip(x_cordinates, y_cordinates):
             if np.random.rand()>1.0-frequency_sample_prob:# randomly filter some points
-                points.add((y,x))    #  or (x,y) ?
+                points.add( ( int(y), int(x) ) )    #  or (x,y) ?
 
         # also some random points
         width = img.shape[0]
@@ -187,8 +187,10 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
 
     # Insert points into subdiv
     for p in points :
-        # import pdb; pdb.set_trace()
-        subdiv.insert(p)
+        try:
+            subdiv.insert(p)
+        except:
+            import pdb; pdb.set_trace()
 
     # Draw delaunay triangles
     draw_delaunay_blur( img, subdiv, method ) 
