@@ -156,29 +156,6 @@ class TrainDataset(Dataset):
     def __len__(self):
         return len(self.img_list)
 
-
-
-class TrainDataset_PictureOnly(Dataset):
-    def __init__(self, args):
-        self.args = args
-        self.root_path = os.path.join(args.data_root, 'train')
-        self.img_list = os.listdir(self.root_path)
-        try:
-            self.img_list.remove('.DS_Store')
-        except:
-            pass
-    
-    def __getitem__(self, idx):
-        img_path = os.path.join(self.root_path, self.img_list[idx])
-        img_raw = Image.open(img_path)
-        img = img_raw.resize((256, 256))
-        img = ToTensor()(img)
-        return img
-    
-    def __len__(self):
-        return len(self.img_list)
-
-
 class TestDataset(Dataset):
     def __init__(self, args):
         self.args = args

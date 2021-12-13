@@ -15,7 +15,7 @@ def parse_args(args=None):
 
     # train
     parser.add_argument('--lr', default=1e-3, type=float)
-    parser.add_argument('--epoch', default=20)
+    parser.add_argument('--epoch', default=20, type=int)
     parser.add_argument('--batch_size', default=4, type=int)
     parser.add_argument('--num_workers', default=0, type=int)
     parser.add_argument('--img_width',default=256, type=int)
