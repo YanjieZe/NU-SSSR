@@ -42,6 +42,22 @@ def make_model(args):
     elif model_name=='SRCNN2':
         from models import SRCNN2
         return SRCNN2(args)
+    elif model_name=='SwinIR':
+        from models import SwinIR
+        # FIXME: just use the default to see whether it works
+
+        # lightweight, scale=2
+        """
+        model = SwinIR(upscale=args.scale, in_chans=3, img_size=args.img_size, window_size=8,
+                    img_range=1., depths=[6, 6, 6, 6], embed_dim=60, num_heads=[6, 6, 6, 6],
+                    mlp_ratio=2, upsampler='pixelshuffledirect', resi_connection='1conv')
+        """
+
+        # denoising if scale=1
+        model = SwinIR(upscale=args.scale, in_chans=3, img_size=args.img_size, window_size=8,
+                    img_range=1., depths=[6, 6, 6, 6, 6, 6], embed_dim=180, num_heads=[6, 6, 6, 6, 6, 6],
+                    mlp_ratio=2, upsampler='', resi_connection='1conv')
+        return model
     elif model_name=='GAN':
         from models import GAN
     elif model_name == 'CNF':
@@ -177,9 +193,14 @@ class TrainDataset(Dataset):
                 [transforms.Resize((self.args.img_width,self.args.img_height))]
                 )
         elif target=='hr':
-            trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+            if self.args.alg=='SwinIR':
+                trans = transforms.Compose( 
+                    [transforms.Resize((self.args.img_width*self.args.scale,self.args.img_height*self.args.scale))]
                 )
+            else:
+                trans = transforms.Compose( 
+                    [transforms.Resize((self.args.img_width,self.args.img_height))]
+                    )
         else:
             raise Exception('Transform not supported.')
         return trans

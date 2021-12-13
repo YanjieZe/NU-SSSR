@@ -4,11 +4,12 @@ def parse_args(input_arg=None):
     parser = argparse.ArgumentParser(input_arg)
 
     # basic
-    parser.add_argument('--alg', default='SRCNN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', 'CUT',  "CNF", "VDSR"], type=str)
+    parser.add_argument('--alg', default='SRCNN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', 'CUT', 'SwinIR',  "CNF", "VDSR"], type=str)
     parser.add_argument('--data_root', default='data/set5', type=str)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--device', default="gpu", type=str)
 
+    
     # sampling
     parser.add_argument('--method', default='center', choices=['center', 'random', 'vertex'], help='method of sampling in the triangle')
     parser.add_argument('--point_num', default=10000, type=int, help="num of points sampled in triangulation")
@@ -18,8 +19,9 @@ def parse_args(input_arg=None):
     parser.add_argument('--epoch', default=20, type=int)
     parser.add_argument('--batch_size', default=4, type=int)
     parser.add_argument('--num_workers', default=0, type=int)
-    parser.add_argument('--img_width',default=256, type=int)
-    parser.add_argument('--img_height',default=256, type=int)
+    parser.add_argument('--img_width',default=128, type=int)
+    parser.add_argument('--img_height',default=128, type=int)
+    parser.add_argument('--img_size', default=128, type=int)
     parser.add_argument('--log_dir', default='logs', type=str)
     parser.add_argument('--description', default='', type=str)
     parser.add_argument('--fifa', default=False, action='store_true', help="train style transfer for fifa project")
@@ -53,6 +55,8 @@ def parse_args(input_arg=None):
     parser.add_argument("--cnf_noscaletest", action="store_true",
                         help="Disable scale in coupling layers only at test time.")
 
+    # swinIR
+    parser.add_argument("--scale", default=2, type=int)
     args = parser.parse_args()
 
     return args

@@ -94,6 +94,7 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
                         frequency_domain_range=20,
                         frequency_sample_prob=0.1,
                         ):
+
     """
     对img进行三角采样，并使用三角中的颜色进行填充，支持的颜色方法：
     center，取三角中心点;
