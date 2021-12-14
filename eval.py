@@ -76,13 +76,15 @@ def evaluation(args):
                 ssim_pred_total += ssim_pred
                 psnr_gt_total += psnr_gt
                 ssim_gt_total += ssim_gt
+                count += 1
 
     psnr_gt_total /= count
     psnr_pred_total /= count
     ssim_gt_total /= count
-    ssim_pred_total /= count          
+    ssim_pred_total /= count      
+
     print("totally: psnr_pred: %f | ssim_pred: %f | psnr_gt: %f | ssim_gt: %f |"%(psnr_pred_total, ssim_pred_total, psnr_gt_total, ssim_gt_total))
-    
+    print("improvement: psnr: %f | ssim: %f |"%(psnr_pred_total-psnr_gt_total, ssim_pred_total-ssim_gt_total) )
 
 if __name__=='__main__':
     args = parse_args()
