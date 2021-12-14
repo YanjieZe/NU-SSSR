@@ -12,23 +12,30 @@
 
 ![](imgs/pred_cycleGAN_epoch40_0.png)
 
-# To Do List
-- [ ] 采样
-  - [x] Center
-  - [x] Vertex
-  - [ ] linear interpolation
-- [ ] 模型方法
+# What We Have Done
+- [x] 点采样
+  - [x] random
+  - [x] fourier
+- [x] 颜色采样
+  - [x] center
+  - [x] vertex 
+- [x] 模型方法
   - [x] Super Resoultion CNN (SRCNN), for single img (ECCV 2014)
   - [x] Conditional Normalizing Flows (CNF), for single img (ICLR 2020)
   - [x] GAN/cycleGAN (目前加了模型，但是还没有想好怎么做，直接img-to-img translation 似乎没有必要)
-  - [ ] 其他更fancy/SOTA的算法
-- [x] 提高框架的使用性
-  - [x] 更好的log方式
-- [x] 报告
-  - [x] 报告框架
-  - [x] 相关工作
+  - [x] Masked Auto-Encoder (MAE)
+  - [x] SwinIR
+  - [ ] CUT
+- [x] 便于使用的脚本 
+- [x] 训练代码（train.py)
+- [x] 推理代码（predict.py）
+- [x] 测试代码（eval.py）
 
-
+# What We Need To Do
+- [ ] 比较不同采样
+- [ ] 比较不同算法的训练阶段
+- [ ] 比较不同算法的测试阶段
+- [ ] 可视化
 
 # 使用方法
 首先下载数据集，在release里面。然后可以通过`--data_root`指定你放数据的地方。

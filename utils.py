@@ -183,6 +183,7 @@ class TrainDataset(Dataset):
         except:
             pass
         self.method = args.method
+        self.sample_method = args.sample_method
         self.transform_on_hr = self.get_transform('hr')
         self.transform_on_lr = self.get_transform('lr')
 
@@ -213,7 +214,7 @@ class TrainDataset(Dataset):
         img_hr= np.array(self.transform_on_hr(img_hr))
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
         img_lr = DelaunayTriangulationBlur(img_hr, \
-            self.args.point_num, self.args.method)
+            self.args.point_num, self.args.method, self.sample_method)
         img_lr = self.transform_on_lr(Image.fromarray(img_lr))
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         

@@ -24,6 +24,7 @@ def predict(args):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     test_dataset = utils.TestDataset(args)
+    # test_dataset = utils.TrainDataset(args)
     test_loader = data.DataLoader(dataset=test_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
