@@ -126,11 +126,13 @@ class TrainDataset(Dataset):
     def get_transform(self, target):
         if target=='lr':
             trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
                 )
         elif target=='hr':
             trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
                 )
         else:
             raise Exception('Transform not supported.')
@@ -173,11 +175,13 @@ class TestDataset(Dataset):
     def get_transform(self, target):
         if target=='lr':
             trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
                 )
         elif target=='hr':
             trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
                 )
         else:
             raise Exception('Transform not supported.')
@@ -185,6 +189,7 @@ class TestDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.root_path, self.img_list[idx])
+        print(img_path)
         img_pair = dict()
 
         img_hr = Image.open(img_path)

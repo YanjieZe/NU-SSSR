@@ -50,6 +50,7 @@ def sample_mean_color(img, pt1, pt2, pt3, method="center"):
 
 # Draw delaunay triangles
 def draw_delaunay_blur(img, subdiv, method) :
+    print(img.shape)
 
     triangleList = subdiv.getTriangleList() 
     size = img.shape
@@ -117,16 +118,17 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center"):
     subdiv = cv2.Subdiv2D(rect) 
     
     # Create an array of points.
-    # points = set()
-    points = []
+    points = set()
+    # points = []
     
     # # generate points randomly
     width = img.shape[0]
     height = img.shape[1]
-    for i in range(point_num):
+    # for i in range(point_num):
+    while len(points) < point_num:
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
-        points.append((y,x))
+        points.add((y,x))
     # sampleOnePoint = lambda width, height : (np.random.randint(0, height), np.random.randint(0, width))
     # samplePoints = np.vectorize(sampleOnePoint)
     # points = samplePoints([width]*point_num, [width]*point_num)
@@ -192,7 +194,8 @@ if __name__ == '__main__':
     # 随机采点
     width = img.shape[0]
     height = img.shape[1]
-    for i in range(1000):
+    while len(points) < 1000:
+    # for i in range(1000):
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
         points.add((y,x))
