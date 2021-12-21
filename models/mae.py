@@ -91,6 +91,59 @@ class MAE(nn.Module):
         
         return loss
     
+    def forward_nomask(self, x: torch.Tensor):
+        device = x.device
+        b, c, h, w = x.shape
+        
+        num_patches = (h // self.patch_h) * (w // self.patch_w)
+        
+        patches = x.view(
+            b, c,
+            h // self.patch_h, self.patch_h,
+            w // self.patch_w, self.patch_w
+        ) \
+        .permute(0, 2, 4, 3, 5, 1) \
+        .reshape(b, num_patches, -1)
+        #* (b, c, h, w) -> (b, c, N_h, h_p, N_w, w_p) ->
+        #* (b, N_h, N_w, h_p, w_p, c) -> (b, N_h, N_w, h_p*w_p*c)
+        
+        num_masked = 0
+        
+        shuffled_indices = torch.rand(b, num_patches, device=device).argsort()
+        unmask_ind = shuffled_indices
+        batch_ind = torch.arange(b, device=device).unsqueeze(1)
+        unmask_patches = patches[batch_ind, shuffled_indices]
+        
+        unmask_tokens = self.encoder.patch_embed(unmask_patches)
+        unmask_tokens += self.encoder.pos_embed.repeat(b, 1, 1)[batch_ind, unmask_ind + 1]
+        
+        encoded_tokens = self.encoder.transformer(unmask_tokens)
+        
+        enc_to_dec_tokens = self.enc_to_dec(encoded_tokens)
+        
+        mask_tokens = self.mask_embed[None, None, :].repeat(b, num_masked, 1)
+        
+        concat_tokens = torch.cat([mask_tokens, enc_to_dec_tokens], dim=1)
+        dec_input_tokens = torch.empty_like(concat_tokens, device=device)
+        dec_input_tokens[batch_ind, shuffled_indices] = concat_tokens
+        
+        decoded_tokens = self.decoder(dec_input_tokens)
+        
+        dec_mask_tokens = decoded_tokens
+        pred_mask_pixel_values = self.head(dec_mask_tokens)
+        
+        # mse_per_patch = (pred_mask_pixel_values - mask_patches).abs().mean(dim=-1)
+        # mse_all_patches = mse_per_patch.mean()
+        
+        recons_patches = patches.detach()
+        recons_patches = pred_mask_pixel_values
+        recons_img = recons_patches.view(
+            b, h // self.patch_h, w // self.patch_w,
+            self.patch_h, self.patch_w, c
+        ).permute(0, 5, 1, 3, 2, 4).reshape(b, c, h, w)
+
+        return recons_img
+    
     @torch.no_grad()
     def predict(self, x: torch.Tensor):
         self.eval()

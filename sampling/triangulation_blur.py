@@ -50,7 +50,7 @@ def sample_mean_color(img, pt1, pt2, pt3, method="center"):
 
 # Draw delaunay triangles
 def draw_delaunay_blur(img, subdiv, method) :
-    print(img.shape)
+    # print(img.shape)
 
     triangleList = subdiv.getTriangleList() 
     size = img.shape
@@ -88,7 +88,7 @@ def draw_voronoi(img, subdiv) :
 
         cv2.circle(img, (int(centers[i][0]), int(centers[i][1])), 3, (0, 0, 0), cv2.FILLED, cv2.LINE_AA, 0)
 
-@nb.jit()
+# @nb.jit()
 def DelaunayTriangulationBlur(img, point_num=1000, method="center"):
     """
     对img进行三角采样，并使用三角中的颜色进行填充，支持的颜色方法：
@@ -151,7 +151,7 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center"):
     # Draw delaunay triangles
     draw_delaunay_blur( img, subdiv, method ) 
 
-    is_draw_points=False
+    is_draw_points=True
     if is_draw_points:
         # Draw points
         for p in points :
@@ -159,6 +159,75 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center"):
 
     return img
 
+# @nb.jit()
+def DelaunayTriangulationBlur_4Channel(img, point_num=1000, method="center"):
+    """
+    对img进行三角采样，并使用三角中的颜色进行填充，支持的颜色方法：
+    center，取三角中心点;
+    random，随机在三角形采样;
+    vertex，取三角形点进行平均;
+    """
+    # if img is None:
+    #     raise Exception('Img can not be None.')
+    # if not isinstance(img, np.ndarray):
+    #     raise Exception('Input should be img/array.')
+    # Turn on animation while drawing triangles
+
+    # Define colors for drawing.
+    delaunay_color = (255,255,255)
+    points_color = (0, 0, 255)
+
+
+    # img = np.zeros(img.shape)
+
+    # Keep a copy around
+    img_orig = img.copy() 
+
+    # Rectangle to be used with Subdiv2D
+    size = img.shape
+    rect = (0, 0, size[1], size[0])
+
+    # Create an instance of Subdiv2D
+    subdiv = cv2.Subdiv2D(rect) 
+    
+    # Create an array of points.
+    points = set()
+    # points = []
+    
+    # # generate points randomly
+    width = img.shape[0]
+    height = img.shape[1]
+    
+    mask = np.zeros((width, height))
+    
+    # for i in range(point_num):
+    while len(points) < point_num:
+        x = np.random.randint(0, width)
+        y = np.random.randint(0, height)
+        points.add((y,x))
+        mask[x][y] = 1
+
+    
+    # # Insert points into subdiv
+    for p in points :
+        # import pdb; pdb.set_trace()
+        subdiv.insert(p)
+    # print(len(points), points)
+    # subdiv.insert(points)
+
+    # Draw delaunay triangles
+    draw_delaunay_blur( img, subdiv, method ) 
+
+    is_draw_points=False
+    if is_draw_points:
+        # Draw points
+        for p in points :
+            draw_point(img, p, (0,0,255))
+    
+    img = img * (1/255)
+    mask = np.expand_dims(mask, axis=2)
+    # print(img.shape, mask.shape)
+    return np.concatenate((img, mask), axis=2)
 
 
 if __name__ == '__main__':
