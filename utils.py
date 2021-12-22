@@ -10,8 +10,8 @@ import torch
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 from torch.autograd import Variable
-import numba as nb
 from torchvision.transforms import ToTensor, ToPILImage
+
 
 def set_seed_everywhere(seed):
     torch.manual_seed(seed)
@@ -30,6 +30,7 @@ def show_img(img):
 
 def save_img(name, img):
     cv2.imwrite(name, img)
+    print("img %s saved"%name)
 
 
 def make_model(args):
@@ -41,6 +42,24 @@ def make_model(args):
     elif model_name=='SRCNN2':
         from models import SRCNN2
         return SRCNN2(args)
+    elif model_name=='SwinIR':
+        from models import SwinIR
+        # FIXME: just use the default to see whether it works
+
+        # lightweight, scale=2
+        """
+        model = SwinIR(upscale=args.scale, in_chans=3, img_size=args.img_size, window_size=8,
+                    img_range=1., depths=[6, 6, 6, 6], embed_dim=60, num_heads=[6, 6, 6, 6],
+                    mlp_ratio=2, upsampler='pixelshuffledirect', resi_connection='1conv')
+        """
+
+        # denoising if scale=1
+        model = SwinIR(upscale=args.scale, in_chans=3, img_size=args.img_size, window_size=8,
+                    img_range=1., depths=[6, 6, 6, 6, 6, 6], embed_dim=180, num_heads=[6, 6, 6, 6, 6, 6],
+                    mlp_ratio=2, upsampler='', resi_connection='1conv')
+        return model
+    elif model_name=='GAN':
+        from models import GAN
     elif model_name == 'CNF':
         from models import condNF
         return condNF.FlowModel(
@@ -63,16 +82,37 @@ def make_model(args):
         raise NotImplemented('Model %s is not implemented.'%model_name)
 
 def save_model(model, epoch, args):
+    if not os.path.exists(args.log_dir):
+        os.mkdir(args.log_dir)
     save_path = os.path.join(args.log_dir, args.alg+'_'+args.description+'_'+str(epoch)+'.pth')
     torch.save(model.state_dict(), save_path)
 
+def save_model_with_name(model, name, epoch, args):
+    save_path = os.path.join(args.log_dir, args.alg+'_' + name+'_'+args.description+'_'+str(epoch)+'.pth')
+    torch.save(model.state_dict(), save_path)
+
+
 def load_model(model, epoch, args):
-    save_path = os.path.join(args.log_dir, args.alg+'_'+str(epoch)+'.pth')
+    try:
+        save_path = os.path.join(args.log_dir, args.alg+'_'+str(epoch)+'.pth')
+        if not torch.cuda.is_available():
+            model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
+        else:
+            model.load_state_dict(torch.load(save_path))
+    except:
+        save_path = os.path.join(args.log_dir, args.alg+'__'+str(epoch)+'.pth')
+        if not torch.cuda.is_available():
+            model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
+        else:
+            model.load_state_dict(torch.load(save_path))
+
+def load_model_with_name(model, name, epoch, args):
+    save_path = os.path.join(args.log_dir, args.alg+'_' + name+'_'+args.description+'_'+str(epoch)+'.pth')
     if not torch.cuda.is_available():
         model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
     else:
         model.load_state_dict(torch.load(save_path))
-    
+
 def collect_function(batch):
     img_pair = dict()
     for idx, pair in enumerate(batch):
@@ -89,24 +129,48 @@ def collect_function(batch):
 
     return img_pair
 
-def show_gt_and_pred(img_hr, img_lr, pred_hr, figsize):
-    plt.figure(1, figsize=figsize)
-    plt.subplot(1, 3, 1) #图一包含1行2列子图，当前画在第一行第一列图上
+def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name):
+    plt.figure(1)
+    plt.subplot(1, 3, 1)
     plt.imshow(img_hr)
     plt.title('ground truth hr')
 
-    plt.figure(1, figsize=figsize)
-    plt.subplot(1, 3, 2) #图一包含1行2列子图，当前画在第一行第一列图上
+    plt.figure(1)
+    plt.subplot(1, 3, 2)
     plt.imshow(img_lr)
     plt.title('ground truth lr')
 
-    plt.figure(1, figsize=figsize)
-    plt.subplot(1, 3, 3)#当前画在第一行第2列图上
+    plt.figure(1)
+    plt.subplot(1, 3, 3)
     plt.imshow(pred_hr)
     plt.title('predict hr')
 
-    plt.show()
+    # plt.show()
+    plt.savefig(save_name)
 
+
+def show_real_and_fake(realA, fakeA, realB, fakeB, id):
+    plt.figure(1)
+    plt.subplot(2, 2, 1) 
+    plt.imshow(realA)
+    plt.title('real A')
+
+    plt.figure(1)
+    plt.subplot(2, 2, 2)
+    plt.imshow(fakeA)
+    plt.title('fake A')
+
+    plt.figure(1)
+    plt.subplot(2, 2, 3)
+    plt.imshow(realB)
+    plt.title('real B')
+
+    plt.figure(1)
+    plt.subplot(2, 2, 4)
+    plt.imshow(fakeB)
+    plt.title('fake B')
+    plt.savefig("imgs/fifa/pred_cycleGAN_epoch40_%u.png"%id)
+    # plt.show()
 
 
 class TrainDataset(Dataset):
@@ -119,6 +183,7 @@ class TrainDataset(Dataset):
         except:
             pass
         self.method = args.method
+        self.sample_method = args.sample_method
         self.transform_on_hr = self.get_transform('hr')
         self.transform_on_lr = self.get_transform('lr')
 
@@ -129,9 +194,14 @@ class TrainDataset(Dataset):
                 [transforms.Resize((self.args.img_width,self.args.img_height))]
                 )
         elif target=='hr':
-            trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+            if self.args.alg=='SwinIR':
+                trans = transforms.Compose( 
+                    [transforms.Resize((self.args.img_width*self.args.scale,self.args.img_height*self.args.scale))]
                 )
+            else:
+                trans = transforms.Compose( 
+                    [transforms.Resize((self.args.img_width,self.args.img_height))]
+                    )
         else:
             raise Exception('Transform not supported.')
         return trans
@@ -144,7 +214,7 @@ class TrainDataset(Dataset):
         img_hr= np.array(self.transform_on_hr(img_hr))
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
         img_lr = DelaunayTriangulationBlur(img_hr, \
-            self.args.point_num, self.args.method)
+            self.args.point_num, self.args.method, self.sample_method)
         img_lr = self.transform_on_lr(Image.fromarray(img_lr))
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         
@@ -307,3 +377,56 @@ def ssim(img1, img2, window_size = 11, size_average = True):
     window = window.type_as(img1)
     
     return _ssim(img1, img2, window, window_size, channel, size_average)
+
+
+class ReplayBuffer:
+    def __init__(self, max_size=50):
+        assert (max_size > 0), "Empty buffer or trying to create a black hole. Be careful."
+        self.max_size = max_size
+        self.data = []
+
+    def push_and_pop(self, data):
+        to_return = []
+        for element in data.data:
+            element = torch.unsqueeze(element, 0)
+            if len(self.data) < self.max_size:
+                self.data.append(element)
+                to_return.append(element)
+            else:
+                if random.uniform(0, 1) > 0.5:
+                    i = random.randint(0, self.max_size - 1)
+                    to_return.append(self.data[i].clone())
+                    self.data[i] = element
+                else:
+                    to_return.append(element)
+        return torch.cat(to_return)
+
+
+# custom weights initialization called on netG and netD
+def weights_init(m):
+    classname = m.__class__.__name__
+    if classname.find("Conv") != -1:
+        torch.nn.init.normal_(m.weight, 0.0, 0.02)
+    elif classname.find("BatchNorm") != -1:
+        torch.nn.init.normal_(m.weight, 1.0, 0.02)
+        torch.nn.init.zeros_(m.bias)
+
+class TrainDataset_PictureOnly(Dataset):
+    def __init__(self, args):
+        self.args = args
+        self.root_path = os.path.join(args.data_root, 'train')
+        self.img_list = os.listdir(self.root_path)
+        try:
+            self.img_list.remove('.DS_Store')
+        except:
+            pass
+    
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.root_path, self.img_list[idx])
+        img_raw = Image.open(img_path)
+        img = img_raw.resize((256, 256))
+        img = ToTensor()(img)
+        return img
+    
+    def __len__(self):
+        return len(self.img_list)

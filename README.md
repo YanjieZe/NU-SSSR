@@ -8,19 +8,35 @@
 
 ![](imgs/blur_point10000.png)
 
-# To Do List
-- [ ] 采样
-  - [x] Center
-  - [x] Vertex
-  - [ ] linear interpolation
-- [ ] 模型方法
+使用cycleGAN的结果:
+
+![](imgs/pred_cycleGAN_epoch40_0.png)
+
+# What We Have Done
+- [x] 点采样
+  - [x] random
+  - [x] fourier
+- [x] 颜色采样
+  - [x] center
+  - [x] vertex 
+- [x] 模型方法
   - [x] Super Resoultion CNN (SRCNN), for single img (ECCV 2014)
   - [x] Conditional Normalizing Flows (CNF), for single img (ICLR 2020)
-  - [x] VDSR
-  - [ ] 其他更fancy/SOTA的算法
-- [ ] 提高框架的使用性
-  - [ ] 更好的log方式
+  - [x] GAN/cycleGAN (目前加了模型，但是还没有想好怎么做，直接img-to-img translation 似乎没有必要)
+  - [x] Masked Auto-Encoder (MAE)
+  - [x] SwinIR
+  - [ ] CUT
+  - [x] MAE
+- [x] 便于使用的脚本 
+- [x] 训练代码（train.py)
+- [x] 推理代码（predict.py）
+- [x] 测试代码（eval.py）
 
+# What We Need To Do
+- [ ] 比较不同采样
+- [ ] 比较不同算法的训练阶段
+- [ ] 比较不同算法的测试阶段
+- [ ] 可视化
 
 # 使用方法
 首先下载数据集，在release里面。然后可以通过`--data_root`指定你放数据的地方。
@@ -81,6 +97,31 @@ celebA, [link](https://jbox.sjtu.edu.cn/l/U1y10y)
 首先使用Voronoi-Delaunay进行三角采样，获得如下图所示的结果：
 ![](imgs/delaunay.jpg)
 
+考虑用多种方法采样：
+1. 先随机采点，再三角化，再取三角中心的颜色作为该三角的值（已实现）
+2. 先进行傅里叶变换，在高频处（细节）多采样，在低频处少采样。再三角化，再取三角中心的颜色作为该三角的值。（待实现）
+
+### 基于傅里叶变换的图像三角化
+超参数`frequency_domain_range`来判断高频和低频的分界线。超参数`frequency_sample_prob`来给所有高频点加一个概率来采样，不是所有都采。
+
+算法伪代码：
+1. 傅里叶变换，获得频域图。
+2. 将低频部分根据frequency_domain_range来mask掉。
+3. 逆变换，获得高频在时域的图。
+4. 对高频pixel采样，以frequency_sample_prob的概率采样。
+5. 再进行全局随机采样。
+6. 用4、5两步获得的采样点进行三角化。
+
+下图为频域可视化。
+![](imgs/fourier_domain.png)
+
+下图为傅里叶高频采样结果。
+![](imgs/fourier_triangulation.png)
+
+
+
+
+
 ## Backbone/Baseline
 1.SRCNN, ECCV 2014, [link](https://github.com/yjn870/SRCNN-pytorch)
 下面两幅图分别是SRCNN和SRCNN2在一个epoch后进行预测的结果。说明了只增加网络宽度和深度后，模型拟合会更慢，会导致算法效果变差。但是在很多个epoch后是否还会这样不清楚。
@@ -89,6 +130,56 @@ celebA, [link](https://jbox.sjtu.edu.cn/l/U1y10y)
 
 ![](imgs/predict_SRCNN2_epoch0.png)
 
+# swinIR 使用说明
+```
+# 001 Classical Image Super-Resolution (middle size)
+# Note that --training_patch_size is just used to differentiate two different settings in Table 2 of the paper. Images are NOT tested patch by patch.
+# (setting1: when model is trained on DIV2K and with training_patch_size=48)
+python main_test_swinir.py --task classical_sr --scale 2 --training_patch_size 48 --model_path model_zoo/swinir/001_classicalSR_DIV2K_s48w8_SwinIR-M_x2.pth --folder_lq testsets/Set5/LR_bicubic/X2 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task classical_sr --scale 3 --training_patch_size 48 --model_path model_zoo/swinir/001_classicalSR_DIV2K_s48w8_SwinIR-M_x3.pth --folder_lq testsets/Set5/LR_bicubic/X3 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task classical_sr --scale 4 --training_patch_size 48 --model_path model_zoo/swinir/001_classicalSR_DIV2K_s48w8_SwinIR-M_x4.pth --folder_lq testsets/Set5/LR_bicubic/X4 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task classical_sr --scale 8 --training_patch_size 48 --model_path model_zoo/swinir/001_classicalSR_DIV2K_s48w8_SwinIR-M_x8.pth --folder_lq testsets/Set5/LR_bicubic/X8 --folder_gt testsets/Set5/HR
+
+# (setting2: when model is trained on DIV2K+Flickr2K and with training_patch_size=64)
+python main_test_swinir.py --task classical_sr --scale 2 --training_patch_size 64 --model_path model_zoo/swinir/001_classicalSR_DF2K_s64w8_SwinIR-M_x2.pth --folder_lq testsets/Set5/LR_bicubic/X2 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task classical_sr --scale 3 --training_patch_size 64 --model_path model_zoo/swinir/001_classicalSR_DF2K_s64w8_SwinIR-M_x3.pth --folder_lq testsets/Set5/LR_bicubic/X3 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task classical_sr --scale 4 --training_patch_size 64 --model_path model_zoo/swinir/001_classicalSR_DF2K_s64w8_SwinIR-M_x4.pth --folder_lq testsets/Set5/LR_bicubic/X4 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task classical_sr --scale 8 --training_patch_size 64 --model_path model_zoo/swinir/001_classicalSR_DF2K_s64w8_SwinIR-M_x8.pth --folder_lq testsets/Set5/LR_bicubic/X8 --folder_gt testsets/Set5/HR
+
+
+# 002 Lightweight Image Super-Resolution (small size)
+python main_test_swinir.py --task lightweight_sr --scale 2 --model_path model_zoo/swinir/002_lightweightSR_DIV2K_s64w8_SwinIR-S_x2.pth --folder_lq testsets/Set5/LR_bicubic/X2 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task lightweight_sr --scale 3 --model_path model_zoo/swinir/002_lightweightSR_DIV2K_s64w8_SwinIR-S_x3.pth --folder_lq testsets/Set5/LR_bicubic/X3 --folder_gt testsets/Set5/HR
+python main_test_swinir.py --task lightweight_sr --scale 4 --model_path model_zoo/swinir/002_lightweightSR_DIV2K_s64w8_SwinIR-S_x4.pth --folder_lq testsets/Set5/LR_bicubic/X4 --folder_gt testsets/Set5/HR
+
+
+# 003 Real-World Image Super-Resolution (use --tile 400 if you run out-of-memory)
+# (middle size)
+python main_test_swinir.py --task real_sr --scale 4 --model_path model_zoo/swinir/003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth --folder_lq testsets/RealSRSet+5images --tile
+
+# (larger size + trained on more datasets)
+python main_test_swinir.py --task real_sr --scale 4 --large_model --model_path model_zoo/swinir/003_realSR_BSRGAN_DFOWMFC_s64w8_SwinIR-L_x4_GAN.pth --folder_lq testsets/RealSRSet+5images
+
+
+# 004 Grayscale Image Deoising (middle size)
+python main_test_swinir.py --task gray_dn --noise 15 --model_path model_zoo/swinir/004_grayDN_DFWB_s128w8_SwinIR-M_noise15.pth --folder_gt testsets/Set12
+python main_test_swinir.py --task gray_dn --noise 25 --model_path model_zoo/swinir/004_grayDN_DFWB_s128w8_SwinIR-M_noise25.pth --folder_gt testsets/Set12
+python main_test_swinir.py --task gray_dn --noise 50 --model_path model_zoo/swinir/004_grayDN_DFWB_s128w8_SwinIR-M_noise50.pth --folder_gt testsets/Set12
+
+
+# 005 Color Image Deoising (middle size)
+python main_test_swinir.py --task color_dn --noise 15 --model_path model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth --folder_gt testsets/McMaster
+python main_test_swinir.py --task color_dn --noise 25 --model_path model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise25.pth --folder_gt testsets/McMaster
+python main_test_swinir.py --task color_dn --noise 50 --model_path model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise50.pth --folder_gt testsets/McMaster
+
+
+# 006 JPEG Compression Artifact Reduction (middle size, using window_size=7 because JPEG encoding uses 8x8 blocks)
+python main_test_swinir.py --task jpeg_car --jpeg 10 --model_path model_zoo/swinir/006_CAR_DFWB_s126w7_SwinIR-M_jpeg10.pth --folder_gt testsets/classic5
+python main_test_swinir.py --task jpeg_car --jpeg 20 --model_path model_zoo/swinir/006_CAR_DFWB_s126w7_SwinIR-M_jpeg20.pth --folder_gt testsets/classic5
+python main_test_swinir.py --task jpeg_car --jpeg 30 --model_path model_zoo/swinir/006_CAR_DFWB_s126w7_SwinIR-M_jpeg30.pth --folder_gt testsets/classic5
+python main_test_swinir.py --task jpeg_car --jpeg 40 --model_path model_zoo/swinir/006_CAR_DFWB_s126w7_SwinIR-M_jpeg40.pth --folder_gt testsets/classic5
+
+```
 
 # 参考
 1. Neural supersampling for real-time rendering, 2020, [link](https://research.fb.com/wp-content/uploads/2020/06/Neural-Supersampling-for-Real-time-Rendering.pdf)

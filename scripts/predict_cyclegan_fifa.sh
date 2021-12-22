@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1,2,3 python predict_cyclegan_fifa.py

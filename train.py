@@ -7,6 +7,7 @@ from arguments import parse_args
 import torch.optim as optim
 import torch.nn as nn
 import torch.utils.data as data
+import tqdm
 try:
 	import wandb
 except:
@@ -41,7 +42,7 @@ def train(args):
     optimizer = optim.Adam(params=model.parameters(),lr=args.lr)
 
     print("Start training...")
-    for e in range(args.epoch):
+    for e in tqdm.tqdm(range(args.epoch)):
         model.train()
         for idx, img_pair in enumerate(train_loader):
     
