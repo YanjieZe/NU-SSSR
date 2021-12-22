@@ -24,7 +24,7 @@ def draw_point(img, p, color ) :
     cv2.circle( img, p, 2, color, cv2.FILLED, cv2.LINE_AA, 0 )
 
 # 从一个三角形区域采集色彩
-def sample_mean_color(img, pt1, pt2, pt3, method="center"):
+def sample_mean_color(img, pt1, pt2, pt3, method="center", mask=None):
     points = np.array([pt1, pt2, pt3])
     rect = cv2.minAreaRect(points)
     ((cx, cy), (width, height), angle) = rect
@@ -34,9 +34,15 @@ def sample_mean_color(img, pt1, pt2, pt3, method="center"):
 
     # center，直接用矩形中心点作为近似的颜色
     if method=="center":
+        if (mask is not None):
+            mask[cy, cx] = 1
         color = img[cy,cx,:]
         color = (int(color[0]), int(color[1]), int(color[2]))
     elif method=="vertex":
+        if (mask is not None):
+            mask[pt1[1], pt1[0]] = 1
+            mask[pt2[1], pt2[0]] = 1
+            mask[pt3[1], pt3[0]] = 1
         color = img[pt1[1], pt1[0],:]
         color += img[pt2[1], pt2[0],:]
         color += img[pt3[1], pt3[0],:]
@@ -49,7 +55,7 @@ def sample_mean_color(img, pt1, pt2, pt3, method="center"):
     return color
 
 # Draw delaunay triangles
-def draw_delaunay_blur(img, subdiv, method) :
+def draw_delaunay_blur(img, subdiv, method, mask=None) :
     # print(img.shape)
 
     triangleList = subdiv.getTriangleList() 
@@ -63,7 +69,7 @@ def draw_delaunay_blur(img, subdiv, method) :
         pt3 = (int(t[4]), int(t[5]))
 
         if rect_contains(r, pt1) and rect_contains(r, pt2) and rect_contains(r, pt3) :
-            color = sample_mean_color(img, pt1, pt2, pt3, method)
+            color = sample_mean_color(img, pt1, pt2, pt3, method, mask)
 
             triangle_cnt = np.array([pt1, pt2, pt3])
             # 通过轮廓填充来填充三角形
@@ -205,7 +211,6 @@ def DelaunayTriangulationBlur_4Channel(img, point_num=1000, method="center"):
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
         points.add((y,x))
-        mask[x][y] = 1
 
     
     # # Insert points into subdiv
@@ -216,7 +221,7 @@ def DelaunayTriangulationBlur_4Channel(img, point_num=1000, method="center"):
     # subdiv.insert(points)
 
     # Draw delaunay triangles
-    draw_delaunay_blur( img, subdiv, method ) 
+    draw_delaunay_blur( img, subdiv, method, mask ) 
 
     is_draw_points=False
     if is_draw_points:

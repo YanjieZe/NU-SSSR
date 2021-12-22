@@ -89,7 +89,7 @@ def collect_function(batch):
 
     return img_pair
 
-def show_gt_and_pred(img_hr, img_lr, pred_hr, figsize):
+def show_gt_and_pred(img_hr, img_lr, pred_hr, figsize=(30, 30)):
     plt.figure(1, figsize=figsize)
     plt.subplot(1, 3, 1) #图一包含1行2列子图，当前画在第一行第一列图上
     plt.imshow(img_hr)
@@ -107,7 +107,35 @@ def show_gt_and_pred(img_hr, img_lr, pred_hr, figsize):
 
     plt.show()
 
+def visualize_all(img_hr, img_lr, img_pred, figsize=(25, 25)):
+    error_color = np.expand_dims(np.array((1.0, 0, 0)), axis=0)
+    
+    error = img_pred - img_hr
+    squared_error = error * error
+    mse_vis = np.sqrt(squared_error).sum(axis=2, keepdims=True)
+    mse_vis = mse_vis @ error_color
+    
+    plt.figure(1, figsize=figsize)
+    plt.subplot(1, 4, 1)
+    plt.imshow(img_lr)
+    plt.title('Delaunay Reconstructed Image')
 
+    plt.figure(1, figsize=figsize)
+    plt.subplot(1, 4, 2)
+    plt.imshow(img_pred)
+    plt.title('MAE Reconstructed Image')
+
+    plt.figure(1, figsize=figsize)
+    plt.subplot(1, 4, 3)
+    plt.imshow(img_hr)
+    plt.title('Groundtruth Image')
+    
+    plt.figure(1, figsize=figsize)
+    plt.subplot(1, 4, 4)
+    plt.imshow(mse_vis)
+    plt.title('Error Visualization')
+
+    plt.show()
 
 class TrainDataset(Dataset):
     def __init__(self, args):
