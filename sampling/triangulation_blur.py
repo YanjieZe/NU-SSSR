@@ -25,7 +25,7 @@ def draw_point(img, p, color ) :
     cv2.circle( img, p, 2, color, cv2.FILLED, cv2.LINE_AA, 0 )
 
 # 从一个三角形区域采集色彩
-def sample_mean_color(img, pt1, pt2, pt3, method="center"):
+def sample_mean_color(img, pt1, pt2, pt3, method="center", mask=None):
     points = np.array([pt1, pt2, pt3])
     rect = cv2.minAreaRect(points)
     ((cx, cy), (width, height), angle) = rect
@@ -35,9 +35,15 @@ def sample_mean_color(img, pt1, pt2, pt3, method="center"):
 
     # center，直接用矩形中心点作为近似的颜色
     if method=="center":
+        if (mask is not None):
+            mask[cy, cx] = 1
         color = img[cy,cx,:]
         color = (int(color[0]), int(color[1]), int(color[2]))
     elif method=="vertex":
+        if (mask is not None):
+            mask[pt1[1], pt1[0]] = 1
+            mask[pt2[1], pt2[0]] = 1
+            mask[pt3[1], pt3[0]] = 1
         color = img[pt1[1], pt1[0],:]
         color += img[pt2[1], pt2[0],:]
         color += img[pt3[1], pt3[0],:]
@@ -50,7 +56,8 @@ def sample_mean_color(img, pt1, pt2, pt3, method="center"):
     return color
 
 # Draw delaunay triangles
-def draw_delaunay_blur(img, subdiv, method) :
+def draw_delaunay_blur(img, subdiv, method, mask=None) :
+    # print(img.shape)
 
     triangleList = subdiv.getTriangleList() 
     size = img.shape
@@ -63,7 +70,7 @@ def draw_delaunay_blur(img, subdiv, method) :
         pt3 = (int(t[4]), int(t[5]))
 
         if rect_contains(r, pt1) and rect_contains(r, pt2) and rect_contains(r, pt3) :
-            color = sample_mean_color(img, pt1, pt2, pt3, method)
+            color = sample_mean_color(img, pt1, pt2, pt3, method, mask)
 
             triangle_cnt = np.array([pt1, pt2, pt3])
             # 通过轮廓填充来填充三角形
@@ -133,7 +140,7 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
         # generate points randomly
         width = img.shape[0]
         height = img.shape[1]
-        for i in range(point_num):
+        while len(points) < point_num:
             x = np.random.randint(0, width)
             y = np.random.randint(0, height)
             points.add((y,x))
@@ -197,7 +204,7 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
     # Draw delaunay triangles
     draw_delaunay_blur( img, subdiv, method ) 
 
-    is_draw_points=False
+    is_draw_points=True
     if is_draw_points:
         # Draw points
         for p in points :
@@ -205,6 +212,74 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
 
     return img
 
+# @nb.jit()
+def DelaunayTriangulationBlur_4Channel(img, point_num=1000, method="center"):
+    """
+    对img进行三角采样，并使用三角中的颜色进行填充，支持的颜色方法：
+    center，取三角中心点;
+    random，随机在三角形采样;
+    vertex，取三角形点进行平均;
+    """
+    # if img is None:
+    #     raise Exception('Img can not be None.')
+    # if not isinstance(img, np.ndarray):
+    #     raise Exception('Input should be img/array.')
+    # Turn on animation while drawing triangles
+
+    # Define colors for drawing.
+    delaunay_color = (255,255,255)
+    points_color = (0, 0, 255)
+
+
+    # img = np.zeros(img.shape)
+
+    # Keep a copy around
+    img_orig = img.copy() 
+
+    # Rectangle to be used with Subdiv2D
+    size = img.shape
+    rect = (0, 0, size[1], size[0])
+
+    # Create an instance of Subdiv2D
+    subdiv = cv2.Subdiv2D(rect) 
+    
+    # Create an array of points.
+    points = set()
+    # points = []
+    
+    # # generate points randomly
+    width = img.shape[0]
+    height = img.shape[1]
+    
+    mask = np.zeros((width, height))
+    
+    # for i in range(point_num):
+    while len(points) < point_num:
+        x = np.random.randint(0, width)
+        y = np.random.randint(0, height)
+        points.add((y,x))
+
+    
+    # # Insert points into subdiv
+    for p in points :
+        # import pdb; pdb.set_trace()
+        subdiv.insert(p)
+    # print(len(points), points)
+    # subdiv.insert(points)
+
+    # Draw delaunay triangles
+    draw_delaunay_blur( img, subdiv, method, mask ) 
+
+    is_draw_points=False
+    if is_draw_points:
+        # Draw points
+        for p in points :
+            draw_point(img, p, (0,0,255))
+    
+    img = img * (1/255)
+    mask = np.expand_dims(mask, axis=2)
+    # print(img.shape, mask.shape)
+    return np.concatenate((img, mask), axis=2)
 
 
 if __name__ == '__main__':
@@ -240,7 +315,8 @@ if __name__ == '__main__':
     # 随机采点
     width = img.shape[0]
     height = img.shape[1]
-    for i in range(1000):
+    while len(points) < 1000:
+    # for i in range(1000):
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
         points.add((y,x))

@@ -129,9 +129,9 @@ def collect_function(batch):
 
     return img_pair
 
-def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name):
-    plt.figure(1)
-    plt.subplot(1, 3, 1)
+def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name, figsize=(30, 30)):
+    plt.figure(1, figsize=figsize)
+    plt.subplot(1, 3, 1) #图一包含1行2列子图，当前画在第一行第一列图上
     plt.imshow(img_hr)
     plt.title('ground truth hr')
 
@@ -172,6 +172,7 @@ def show_real_and_fake(realA, fakeA, realB, fakeB, id):
     plt.savefig("imgs/fifa/pred_cycleGAN_epoch40_%u.png"%id)
     # plt.show()
 
+    plt.show()
 
 class TrainDataset(Dataset):
     def __init__(self, args):
@@ -192,6 +193,7 @@ class TrainDataset(Dataset):
         if target=='lr':
             trans = transforms.Compose( 
                 [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
                 )
         elif target=='hr':
             if self.args.alg=='SwinIR':
@@ -226,29 +228,6 @@ class TrainDataset(Dataset):
     def __len__(self):
         return len(self.img_list)
 
-
-
-class TrainDataset_PictureOnly(Dataset):
-    def __init__(self, args):
-        self.args = args
-        self.root_path = os.path.join(args.data_root, 'train')
-        self.img_list = os.listdir(self.root_path)
-        try:
-            self.img_list.remove('.DS_Store')
-        except:
-            pass
-    
-    def __getitem__(self, idx):
-        img_path = os.path.join(self.root_path, self.img_list[idx])
-        img_raw = Image.open(img_path)
-        img = img_raw.resize((256, 256))
-        img = ToTensor()(img)
-        return img
-    
-    def __len__(self):
-        return len(self.img_list)
-
-
 class TestDataset(Dataset):
     def __init__(self, args):
         self.args = args
@@ -266,11 +245,13 @@ class TestDataset(Dataset):
     def get_transform(self, target):
         if target=='lr':
             trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
                 )
         elif target=='hr':
             trans = transforms.Compose( 
-                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
                 )
         else:
             raise Exception('Transform not supported.')
@@ -278,6 +259,7 @@ class TestDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.root_path, self.img_list[idx])
+        # print(img_path)
         img_pair = dict()
 
         img_hr = Image.open(img_path)
