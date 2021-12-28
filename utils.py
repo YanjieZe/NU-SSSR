@@ -129,7 +129,7 @@ def collect_function(batch):
 
     return img_pair
 
-def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name, figsize=(30, 30)):
+def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name=None, figsize=(30, 30)):
     plt.figure(1, figsize=figsize)
     plt.subplot(1, 3, 1) #图一包含1行2列子图，当前画在第一行第一列图上
     plt.imshow(img_hr)
@@ -146,7 +146,8 @@ def show_gt_and_pred(img_hr, img_lr, pred_hr, save_name, figsize=(30, 30)):
     plt.title('predict hr')
 
     # plt.show()
-    plt.savefig(save_name)
+    if save_name is not None:
+        plt.savefig(save_name)
 
 
 def show_real_and_fake(realA, fakeA, realB, fakeB, id):
@@ -323,6 +324,7 @@ def _ssim(img1, img2, window, window_size, channel, size_average = True):
         return ssim_map.mean()
     else:
         return ssim_map.mean(1).mean(1).mean(1)
+
 
 class SSIM(torch.nn.Module):
     def __init__(self, window_size = 11, size_average = True):

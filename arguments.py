@@ -1,7 +1,7 @@
 import argparse
 
 def parse_args(input_arg=None):
-    parser = argparse.ArgumentParser(input_arg)
+    parser = argparse.ArgumentParser()
 
     # basic
     parser.add_argument('--alg', default='SRCNN', choices=['SRCNN', 'SRCNN2', 'CycleGAN', 'CUT', 'SwinIR',  "CNF", "VDSR", 'MAE'], type=str)
@@ -11,7 +11,7 @@ def parse_args(input_arg=None):
 
     
     # sampling
-    parser.add_argument('--method', default='center', choices=['center', 'random', 'vertex'], help='method of sampling in the triangle')
+    parser.add_argument('--method', default='center', choices=['center', 'random', 'vertex', 'barycentric'], help='method of sampling in the triangle')
     parser.add_argument('--point_num', default=10000, type=int, help="num of points sampled in triangulation")
     parser.add_argument('--sample_method', default="random", choices=["random", "fourier"])
     
@@ -25,7 +25,7 @@ def parse_args(input_arg=None):
     parser.add_argument('--img_size', default=128, type=int)
     parser.add_argument('--log_dir', default='logs', type=str)
     parser.add_argument('--description', default='', type=str)
-    parser.add_argument('--fifa', default=False, action='store_true', help="train style transfer for fifa project")
+    # parser.add_argument('--fifa', default=False, action='store_true', help="train style transfer for fifa project")
     parser.add_argument("--decay_epochs", type=int, default=100,
                     help="epoch to start linearly decaying the learning rate to 0. (default:100)")
     # predict
@@ -58,7 +58,7 @@ def parse_args(input_arg=None):
 
     # swinIR
     parser.add_argument("--scale", default=2, type=int)
-    args = parser.parse_args()
+    args = parser.parse_args(input_arg)
 
     return args
 
