@@ -153,9 +153,10 @@ def draw_voronoi(img, subdiv) :
 
 
 def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
-                        sample_point_method="fourier", 
+                        sample_point_method="random", 
                         frequency_domain_range=20,
                         frequency_sample_prob=0.1,
+                        sobel_exponential=2
                         ):
 
     """
@@ -245,7 +246,27 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
             points.add((y,x))
 
         # utils.save_img("imgs/high_freq.jpg", img_back)
+    elif sample_point_method=='sobel':
+        img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        img_sobelX = cv2.Sobel(img_gray, -1, 1, 0)
+        img_sobelY = cv2.Sobel(img_gray, -1, 0, 1)
+        img_sobel = (img_sobelX**2 + img_sobelY**2).astype(np.float32)
+        # img_sobel = np.sqrt(img_sobel)
+        img_sobel = img_sobel**sobel_exponential
+        prob = img_sobel - np.min(img_sobel)
+        prob = prob / np.sum(img_sobel, axis=(0, 1))
+        prob = prob.flatten()
 
+        points_seperate = np.meshgrid(np.arange(img_gray.shape[0]), np.arange(img_gray.shape[1]))
+        points = np.stack(points_seperate, axis=1)
+
+        points = []
+        choices = np.random.choice(a=np.arange(img_gray.shape[0] * img_gray.shape[1]), size=point_num, replace=False, p=prob)
+        for p in choices:
+            points.append((p // img.shape[0], p % img.shape[0]))
+            
+    else:
+        raise NotImplementedError(f"Point Sampling Method \"{sample_point_method}\" is not implemented.")
 
 
 
@@ -271,9 +292,10 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
     return img
 
 def DelaunayTriangulationBlur_4Channel(img, point_num=1000, method="center", \
-                        sample_point_method="fourier", 
+                        sample_point_method="random", 
                         frequency_domain_range=20,
                         frequency_sample_prob=0.1,
+                        sobel_exponential=2
                         ):
 
     """
@@ -365,17 +387,37 @@ def DelaunayTriangulationBlur_4Channel(img, point_num=1000, method="center", \
             points.add((y,x))
 
         # utils.save_img("imgs/high_freq.jpg", img_back)
+    elif sample_point_method=='sobel':
+        img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        img_sobelX = cv2.Sobel(img_gray, -1, 1, 0)
+        img_sobelY = cv2.Sobel(img_gray, -1, 0, 1)
+        img_sobel = (img_sobelX**2 + img_sobelY**2).astype(np.float32)
+        # img_sobel = np.sqrt(img_sobel)
+        img_sobel = img_sobel**sobel_exponential
+        prob = img_sobel - np.min(img_sobel)
+        prob = prob / np.sum(img_sobel, axis=(0, 1))
+        prob = prob.flatten()
 
+        points_seperate = np.meshgrid(np.arange(img_gray.shape[0]), np.arange(img_gray.shape[1]))
+        points = np.stack(points_seperate, axis=1)
+
+        points = []
+        choices = np.random.choice(a=np.arange(img_gray.shape[0] * img_gray.shape[1]), size=point_num, replace=False, p=prob)
+        for p in choices:
+            points.append((p // img.shape[0], p % img.shape[0]))
+            
+    else:
+        raise NotImplementedError(f"Point Sampling Method \"{sample_point_method}\" is not implemented.")
 
 
 
     
     # # Insert points into subdiv
     for p in points :
-        try:
-            subdiv.insert(p)
-        except:
-            import pdb; pdb.set_trace()
+        # try:
+        subdiv.insert([int(p[1]), int(p[0])])
+        # except:
+        #     import pdb; pdb.set_trace()
 
     # Draw delaunay triangles
     draw_delaunay_blur( img, subdiv, method, mask ) 

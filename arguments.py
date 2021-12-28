@@ -13,7 +13,7 @@ def parse_args(input_arg=None):
     # sampling
     parser.add_argument('--method', default='center', choices=['center', 'random', 'vertex', 'barycentric'], help='method of sampling in the triangle')
     parser.add_argument('--point_num', default=10000, type=int, help="num of points sampled in triangulation")
-    parser.add_argument('--sample_method', default="random", choices=["random", "fourier"])
+    parser.add_argument('--sample_method', default="random", choices=["random", "fourier", "sobel"])
     
     # train
     parser.add_argument('--lr', default=1e-3, type=float)
