@@ -220,7 +220,7 @@ class TrainDataset(Dataset):
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         
         img_pair['hr'] /= 255
-        img_pair['lr'] /= 255
+        # img_pair['lr'] /= 255
 
         return img_pair
     
@@ -263,13 +263,15 @@ class TestDataset(Dataset):
         img_hr = Image.open(img_path)
         img_hr= np.array(self.transform_on_hr(img_hr))
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
+        
         img_lr = DelaunayTriangulationBlur(img=img_hr, \
             point_num=self.args.point_num, method=self.args.method, sample_point_method=self.args.sample_method)
+        
         img_lr = self.transform_on_lr(Image.fromarray(img_lr))
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         
         img_pair['hr'] /= 255
-        img_pair['lr'] /= 255
+        # img_pair['lr'] /= 255
 
         return img_pair
     
@@ -316,8 +318,8 @@ class TrainDataset_4Channel(Dataset):
         img_hr= np.array(self.transform_on_hr(img_hr))
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
         img_lr = DelaunayTriangulationBlur_4Channel(img=img_hr, \
-            point_num=self.args.point_num, method=self.method, sample_point_method=self.sample_method)
-        img_lr = self.transform_on_lr(Image.fromarray(img_lr))
+            point_num=self.args.point_num, method=self.args.method, sample_point_method=self.args.sample_method)
+        # img_lr = self.transform_on_lr(Image.fromarray(img_lr))
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         
         img_pair['hr'] /= 255
@@ -366,7 +368,7 @@ class TestDataset_4Channel(Dataset):
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
         img_lr = DelaunayTriangulationBlur_4Channel(img=img_hr, \
             point_num=self.args.point_num, method=self.args.method, sample_point_method=self.args.sample_method)
-        img_lr = self.transform_on_lr(Image.fromarray(img_lr))
+        # img_lr = self.transform_on_lr(Image.fromarray(img_lr))
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         
         img_pair['hr'] /= 255

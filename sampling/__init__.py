@@ -1,3 +1,4 @@
 from .triangulation import DelaunayTriangulation
 from .triangulation_blur import DelaunayTriangulationBlur
+from .triangulation_blur import DelaunayTriangulationBlur_4Channel
 
