@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch.utils.data import Dataset
 import os
-from sampling import DelaunayTriangulationBlur
+from sampling import DelaunayTriangulationBlur, DelaunayTriangulationBlur_4Channel
 from PIL import Image
 import random
 import torch
@@ -184,8 +184,6 @@ class TrainDataset(Dataset):
             self.img_list.remove('.DS_Store')
         except:
             pass
-        self.method = args.method
-        self.sample_method = args.sample_method
         self.transform_on_hr = self.get_transform('hr')
         self.transform_on_lr = self.get_transform('lr')
 
@@ -216,8 +214,8 @@ class TrainDataset(Dataset):
         img_hr = Image.open(img_path)
         img_hr= np.array(self.transform_on_hr(img_hr))
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
-        img_lr = DelaunayTriangulationBlur(img_hr, \
-            self.args.point_num, self.args.method, self.sample_method)
+        img_lr = DelaunayTriangulationBlur(img=img_hr, \
+            point_num=self.args.point_num, method=self.args.method, sample_point_method=self.args.sample_method)
         img_lr = self.transform_on_lr(Image.fromarray(img_lr))
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         
@@ -238,7 +236,6 @@ class TestDataset(Dataset):
             self.img_list.remove('.DS_Store')
         except:
             pass
-        self.method = args.method
         self.transform_on_hr = self.get_transform('hr')
         self.transform_on_lr = self.get_transform('lr')
 
@@ -266,8 +263,8 @@ class TestDataset(Dataset):
         img_hr = Image.open(img_path)
         img_hr= np.array(self.transform_on_hr(img_hr))
         img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
-        img_lr = DelaunayTriangulationBlur(img_hr, \
-            self.args.point_num, self.args.method)
+        img_lr = DelaunayTriangulationBlur(img=img_hr, \
+            point_num=self.args.point_num, method=self.args.method, sample_point_method=self.args.sample_method)
         img_lr = self.transform_on_lr(Image.fromarray(img_lr))
         img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
         
@@ -279,7 +276,106 @@ class TestDataset(Dataset):
     def __len__(self):
         return len(self.img_list)
 
-  
+class TrainDataset_4Channel(Dataset):
+    def __init__(self, args):
+        self.args = args
+        self.root_path = os.path.join(args.data_root, 'train')
+        self.img_list = os.listdir(self.root_path)
+        try:
+            self.img_list.remove('.DS_Store')
+        except:
+            pass
+        self.transform_on_hr = self.get_transform('hr')
+        self.transform_on_lr = self.get_transform('lr')
+
+    
+    def get_transform(self, target):
+        if target=='lr':
+            trans = transforms.Compose( 
+                [transforms.Resize((self.args.img_width,self.args.img_height))]
+                # [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
+                )
+        elif target=='hr':
+            if self.args.alg=='SwinIR':
+                trans = transforms.Compose( 
+                    [transforms.Resize((self.args.img_width*self.args.scale,self.args.img_height*self.args.scale))]
+                )
+            else:
+                trans = transforms.Compose( 
+                    [transforms.Resize((self.args.img_width,self.args.img_height))]
+                    )
+        else:
+            raise Exception('Transform not supported.')
+        return trans
+
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.root_path, self.img_list[idx])
+        img_pair = dict()
+
+        img_hr = Image.open(img_path)
+        img_hr= np.array(self.transform_on_hr(img_hr))
+        img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
+        img_lr = DelaunayTriangulationBlur_4Channel(img=img_hr, \
+            point_num=self.args.point_num, method=self.method, sample_point_method=self.sample_method)
+        img_lr = self.transform_on_lr(Image.fromarray(img_lr))
+        img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
+        
+        img_pair['hr'] /= 255
+        # img_pair['lr'] /= 255 # Moved to DelaunayTriangulationBlur_4Channel
+
+        return img_pair
+    
+    def __len__(self):
+        return len(self.img_list)
+
+class TestDataset_4Channel(Dataset):
+    def __init__(self, args):
+        self.args = args
+        self.root_path = os.path.join(args.data_root, 'test')
+        self.img_list = os.listdir(self.root_path)
+        try:
+            self.img_list.remove('.DS_Store')
+        except:
+            pass
+        self.transform_on_hr = self.get_transform('hr')
+        self.transform_on_lr = self.get_transform('lr')
+
+    
+    def get_transform(self, target):
+        if target=='lr':
+            trans = transforms.Compose( 
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
+                )
+        elif target=='hr':
+            trans = transforms.Compose( 
+                # [transforms.Resize((self.args.img_width,self.args.img_height))]
+                [transforms.CenterCrop((self.args.img_width,self.args.img_height))]
+                )
+        else:
+            raise Exception('Transform not supported.')
+        return trans
+
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.root_path, self.img_list[idx])
+        # print(img_path)
+        img_pair = dict()
+
+        img_hr = Image.open(img_path)
+        img_hr= np.array(self.transform_on_hr(img_hr))
+        img_pair['hr'] = torch.tensor(img_hr, dtype=torch.float32)
+        img_lr = DelaunayTriangulationBlur_4Channel(img=img_hr, \
+            point_num=self.args.point_num, method=self.args.method, sample_point_method=self.args.sample_method)
+        img_lr = self.transform_on_lr(Image.fromarray(img_lr))
+        img_pair['lr'] = torch.tensor(np.array(img_lr), dtype=torch.float32)
+        
+        img_pair['hr'] /= 255
+        # img_pair['lr'] /= 255 # Moved to DelaunayTriangulationBlur_4Channel
+
+        return img_pair
+    
+    def __len__(self):
+        return len(self.img_list)
 
 def psnr(gt, pred, size_average = True):
     # img1 and img2 have range [0, 255]
