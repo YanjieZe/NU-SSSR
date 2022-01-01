@@ -197,7 +197,7 @@ def DelaunayTriangulationBlur(img, point_num=1000, method="center", \
     
     if sample_point_method=='random':
         # generate points randomly
-        while len(points) < point_num:
+        for i in range(point_num):
             x = np.random.randint(0, width)
             y = np.random.randint(0, height)
             points.add((y,x))
@@ -338,7 +338,8 @@ def DelaunayTriangulationBlur_4Channel(img, point_num=1000, method="center", \
     
     if sample_point_method=='random':
         # generate points randomly
-        while len(points) < point_num:
+        # sampling fixed times
+        for i in range(point_num):
             x = np.random.randint(0, width)
             y = np.random.randint(0, height)
             points.add((y,x))
@@ -468,8 +469,8 @@ if __name__ == '__main__':
     
 
     # 随机采点
-    while len(points) < 1000:
-    # for i in range(1000):
+    # while len(points) < 1000:
+    for i in range(1000):
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
         points.add((y,x))

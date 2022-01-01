@@ -176,7 +176,7 @@ if __name__ == "__main__":
             # ('fourier', '1000', 'center'),
             # ('sobel', '1000', 'center'),
             # ('random', '1000', 'vertex'),
-            ('random', '1000', 'barycentric'),
+            # ('random', '1000', 'barycentric'),
             
             ('random', '10000', 'center'),
             ('fourier', '10000', 'center'),
