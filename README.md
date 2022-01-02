@@ -7,7 +7,7 @@ Non-uniformly Sparsely Sampled Image Super-Resolution and Reconstruction: A Meth
 # 项目说明
 本项目为**CS337：计算机图形学**的课程大作业。课题为“非均匀稀疏样本图像超采样”。我们的算法框架主要致力于解决如下问题：将一张非均匀采样的图像尽可能复原为原图。
 下面展示了使用我们的算法进行非均匀采样后的图像。这三张图分别为：原图，使用1000个采样点的图像，使用10000个采样点的图像。
-![](imgs/img_origin.jepg)
+![](imgs/img_origin.jpeg)
 
 ![](imgs/blur_point1000.jpg)
 
