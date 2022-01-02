@@ -14,10 +14,11 @@ CUDA_VISIBLE_DEVICES=4,5,6 python train.py --alg $ALG \
                 --img_size 64 \
                 --scale 1 \
                 --seed 0 \
-                --epoch 200 \
-                --wandb \
-                --wandb_project CG \
-                --wandb_name 0 \
-                --wandb_group $GROUP \
+                --epoch 200
+
+                # --wandb \
+                # --wandb_project CG \
+                # --wandb_name 0 \
+                # --wandb_group $GROUP \
                 
 
